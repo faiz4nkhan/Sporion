@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:livebuzz/CricketScorePage.dart';
-import 'package:livebuzz/BasketballPage.dart';// Ensure this import is needed
+import 'package:livebuzz/BasketballPage.dart';
+import 'package:livebuzz/Volleyball.dart';
+import 'package:livebuzz/Kabaddi.dart';
+import 'package:livebuzz/khokho.dart';
 
-// Sports Page
+
+
 class SportsPage extends StatelessWidget {
   final List<Map<String, String>> sports = [
     {
@@ -18,12 +22,12 @@ class SportsPage extends StatelessWidget {
       'image': 'assets/images/vollyball.jpg',
     },
     {
-      'name': 'Football',
-      'image': 'assets/images/football.jpg',
+      'name': 'khokho',
+      'image': 'assets/images/khokho.jpg',
     },
     {
-      'name': 'Tennis',
-      'image': 'assets/images/tt.jpg',
+      'name': 'Kabaddi',
+      'image': 'assets/images/kabaddi.jpg',
     },
   ];
 
@@ -56,25 +60,37 @@ class SportsPage extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               onTap: () {
-                if (sports[index]['name'] == 'Basketball') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BasketballPage(isLoggedIn: true),
+          if (sports[index]['name'] == 'Basketball') {
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => BasketballPage()),
+          );
+          } else if (sports[index]['name'] == 'Cricket') {
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CricketScorePage()),
+          );
+          } else if (sports[index]['name'] == 'Volleyball') {
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => VolleyballScorePage()),
+          );
+          } else if (sports[index]['name'] == 'khokho') {
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => KhoKhoScorePage()),
+          );
+          } else if (sports[index]['name'] == 'Kabaddi') {  // ✅ Add Kabaddi case
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => KabaddiScorePage()),  // ✅ Navigate to KabaddiScorePage
+          );
+          } else {
+          print('${sports[index]['name']} tapped');
+          }
+          }
 
-                    ),
-                  );
-                } else if (sports[index]['name'] == 'Cricket') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CricketScorePage(), // Navigate to CricketScorePage
-                    ),
-                  );
-                } else {
-                  print('${sports[index]['name']} tapped');
-                }
-              },
+
             ),
           );
         },

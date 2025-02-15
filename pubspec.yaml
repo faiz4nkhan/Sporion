@@ -57,9 +57,14 @@ flutter:
   assets:
     - assets/images/basketball-hoop-with-blue-sky.jpg
     - assets/images/cricket-bat-ball-foreground-pitch.jpg
-    - assets/images/football.jpg
-    - assets/images/tt.jpg
+    - assets/images/khokho.jpg
+    - assets/images/kabaddi.jpg
     - assets/images/vollyball.jpg
+    - assets/images/news1.jpg
+    - assets/images/news2.jpg
+    - assets/images/news3.jpg
+    - assets/images/news4.jpg
+
 
 
   # To add assets to your application, add an assets section, like this:

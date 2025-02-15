@@ -1,32 +1,20 @@
 import 'package:flutter/material.dart';
 
-// Define the ScoreCard widget here
-class ScoreCard extends StatelessWidget {
+// Define the KabaddiScoreCard widget
+class KabaddiScoreCard extends StatelessWidget {
   final String teamName1;
   final String teamName2;
-  final int runs1;
-  final int wickets1;
-  final double overs1;
-  final int maxOvers1;
-  final int runs2;
-  final int wickets2;
-  final double overs2;
-  final int maxOvers2;
+  final List<int> setScores1;
+  final List<int> setScores2;
   final String matchStatus;
   final List<String> players1;
   final List<String> players2;
 
-  ScoreCard({
+  KabaddiScoreCard({
     required this.teamName1,
     required this.teamName2,
-    required this.runs1,
-    required this.wickets1,
-    required this.overs1,
-    required this.maxOvers1,
-    required this.runs2,
-    required this.wickets2,
-    required this.overs2,
-    required this.maxOvers2,
+    required this.setScores1,
+    required this.setScores2,
     required this.matchStatus,
     required this.players1,
     required this.players2,
@@ -40,17 +28,11 @@ class ScoreCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MatchDetailPage(
+            builder: (context) => KabaddiMatchDetailPage(
               teamName1: teamName1,
               teamName2: teamName2,
-              runs1: runs1,
-              wickets1: wickets1,
-              overs1: overs1,
-              maxOvers1: maxOvers1,
-              runs2: runs2,
-              wickets2: wickets2,
-              overs2: overs2,
-              maxOvers2: maxOvers2,
+              setScores1: setScores1,
+              setScores2: setScores2,
               matchStatus: matchStatus,
               players1: players1,
               players2: players2,
@@ -75,7 +57,7 @@ class ScoreCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: Colors.black,
                 ),
               ),
               SizedBox(height: 15),
@@ -87,7 +69,7 @@ class ScoreCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Colors.blueAccent,
                     ),
                   ),
                   Text(
@@ -95,12 +77,13 @@ class ScoreCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Colors.blueAccent,
                     ),
                   ),
                 ],
               ),
               SizedBox(height: 10),
+              // Display Set Scores
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -108,19 +91,11 @@ class ScoreCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Score: $runs1/$wickets1",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        "Overs: $overs1/$maxOvers1",
+                        "Set Scores: ${setScores1.join(', ')}",
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
                     ],
@@ -129,19 +104,11 @@ class ScoreCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Score: $runs2/$wickets2",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        "Overs: $overs2/$maxOvers2",
+                        "Set Scores: ${setScores2.join(', ')}",
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
                     ],
@@ -156,33 +123,21 @@ class ScoreCard extends StatelessWidget {
   }
 }
 
-// MatchDetailPage to show detailed match information
-class MatchDetailPage extends StatelessWidget {
+// KabaddiMatchDetailPage to show detailed match information
+class KabaddiMatchDetailPage extends StatelessWidget {
   final String teamName1;
   final String teamName2;
-  final int runs1;
-  final int wickets1;
-  final double overs1;
-  final int maxOvers1;
-  final int runs2;
-  final int wickets2;
-  final double overs2;
-  final int maxOvers2;
+  final List<int> setScores1;
+  final List<int> setScores2;
   final String matchStatus;
   final List<String> players1;
   final List<String> players2;
 
-  MatchDetailPage({
+  KabaddiMatchDetailPage({
     required this.teamName1,
+    required this.setScores1,
+    required this.setScores2,
     required this.teamName2,
-    required this.runs1,
-    required this.wickets1,
-    required this.overs1,
-    required this.maxOvers1,
-    required this.runs2,
-    required this.wickets2,
-    required this.overs2,
-    required this.maxOvers2,
     required this.matchStatus,
     required this.players1,
     required this.players2,
@@ -199,56 +154,58 @@ class MatchDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // Display Score and Overs in bold at the top
+            // Display Set Scores in bold at the top
             Container(
               decoration: BoxDecoration(
-                color: Colors.blue[100], // Blue background for the score section
+                color: Colors.lightBlueAccent, // Orange background for the score section
                 borderRadius: BorderRadius.circular(10),
               ),
               padding: EdgeInsets.all(15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Team A Set Scores (on the left side)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "$teamName1: $runs1/$wickets1",
+                        "$teamName1 Set :",
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
+                          color: Colors.black,
                         ),
                       ),
-                      SizedBox(height: 5),
+                      SizedBox(height: 5), // Space between label and scores
                       Text(
-                        "Overs: $overs1/$maxOvers1",
+                        "${setScores1.join(', ')}", // Show set scores for Team A
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
+                          color: Colors.black,
                         ),
                       ),
                     ],
                   ),
+                  // Space between Team A and Team B Set Scores
+                  SizedBox(width: 30),
+                  // Team B Set Scores (on the right side)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "$teamName2: $runs2/$wickets2",
+                        "$teamName2 Set :",
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
+                          color: Colors.black,
                         ),
                       ),
-                      SizedBox(height: 5),
+                      SizedBox(height: 5), // Space between label and scores
                       Text(
-                        "Overs: $overs2/$maxOvers2",
+                        "${setScores2.join(', ')}", // Show set scores for Team B
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
+                          color: Colors.black,
                         ),
                       ),
                     ],
@@ -256,7 +213,7 @@ class MatchDetailPage extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 30),
             // Display Team A players on the left and Team B players on the right
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -267,7 +224,7 @@ class MatchDetailPage extends StatelessWidget {
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.blue[50], // Light blue background for Team A
+                      color: Colors.blueAccent, // Light orange background for Team A
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +234,7 @@ class MatchDetailPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue[800],
+                            color: Colors.black,
                           ),
                         ),
                         SizedBox(height: 10),
@@ -297,7 +254,7 @@ class MatchDetailPage extends StatelessWidget {
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.blue[50], // Light blue background for Team B
+                      color: Colors.blueAccent, // Light orange background for Team B
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,7 +264,7 @@ class MatchDetailPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue[800],
+                            color: Colors.black,
                           ),
                         ),
                         SizedBox(height: 10),
@@ -329,105 +286,64 @@ class MatchDetailPage extends StatelessWidget {
   }
 }
 
-// The main CricketScorePage widget
-class CricketScorePage extends StatelessWidget {
+// The main KabaddiScorePage widget
+class KabaddiScorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cricket Match Scores'),
-        backgroundColor: Colors.blueAccent,
+        title: Text('Kabaddi Match Scores'),
+        backgroundColor: Colors.blue,
       ),
       body: ListView(
         children: [
-          ScoreCard(
+          KabaddiScoreCard(
             teamName1: "Team A",
             teamName2: "Team B",
-            runs1: 120,
-            wickets1: 4,
-            overs1: 12.3,
-            maxOvers1: 20,
-            runs2: 110,
-            wickets2: 3,
-            overs2: 10.5,
-            maxOvers2: 20,
+            setScores1: [20, 18, 22],
+            setScores2: [15, 20, 18],
             matchStatus: "Live",
-            players1: ["Player A1", "Player A2", "Player A3", "Player A4", "Player A5", "Player A6", "Player A7", "Player A8", "Player A9", "Player A10", "Player A11"],
-            players2: ["Player B1", "Player B2", "Player B3", "Player B4", "Player B5", "Player B6", "Player B7", "Player B8", "Player B9", "Player B10", "Player B11"],
+            players1: ["Player A1", "Player A2", "Player A3", "Player A4", "Player A5"],
+            players2: ["Player B1", "Player B2", "Player B3", "Player B4", "Player B5"],
           ),
-          ScoreCard(
+          KabaddiScoreCard(
             teamName1: "Team C",
             teamName2: "Team D",
-            runs1: 180,
-            wickets1: 4,
-            overs1: 10.3,
-            maxOvers1: 20,
-            runs2: 100,
-            wickets2: 3,
-            overs2: 15.5,
-            maxOvers2: 20,
-            matchStatus: "",
-            players1: ["Player A1", "Player A2", "Player A3", "Player A4", "Player A5", "Player A6", "Player A7", "Player A8", "Player A9", "Player A10", "Player A11"],
-            players2: ["Player B1", "Player B2", "Player B3", "Player B4", "Player B5", "Player B6", "Player B7", "Player B8", "Player B9", "Player B10", "Player B11"],
+            setScores1: [18, 15, 20],
+            setScores2: [22, 19, 17],
+            matchStatus: "Completed",
+            players1: ["Player C1", "Player C2", "Player C3", "Player C4", "Player C5"],
+            players2: ["Player D1", "Player D2", "Player D3", "Player D4", "Player D5"],
           ),
-          ScoreCard(
+          KabaddiScoreCard(
             teamName1: "Team E",
             teamName2: "Team F",
-            runs1: 90,
-            wickets1: 8,
-            overs1: 9.2,
-            maxOvers1: 20,
-            runs2: 80,
-            wickets2: 10,
-            overs2: 5.5,
-            maxOvers2: 20,
-            matchStatus: "Live",
-            players1: ["Player A1", "Player A2", "Player A3", "Player A4", "Player A5", "Player A6", "Player A7", "Player A8", "Player A9", "Player A10", "Player A11"],
-            players2: ["Player B1", "Player B2", "Player B3", "Player B4", "Player B5", "Player B6", "Player B7", "Player B8", "Player B9", "Player B10", "Player B11"],
+            setScores1: [25, 22],
+            setScores2: [21, 24],
+            matchStatus: "Upcoming",
+            players1: ["Player E1", "Player E2", "Player E3", "Player E4", "Player E5"],
+            players2: ["Player F1", "Player F2", "Player F3", "Player F4", "Player F5"],
           ),
-          ScoreCard(
+          KabaddiScoreCard(
             teamName1: "Team G",
-            teamName2: "Team H",
-            runs1: 150,
-            wickets1: 6,
-            overs1: 15.3,
-            maxOvers1: 20,
-            runs2: 152,
-            wickets2: 3,
-            overs2: 19.0,
-            maxOvers2: 20,
+            teamName2: "Team h",
+            setScores1: [25, 22],
+            setScores2: [21, 24],
             matchStatus: "",
-            players1: ["Player A1", "Player A2", "Player A3", "Player A4", "Player A5", "Player A6", "Player A7", "Player A8", "Player A9", "Player A10", "Player A11"],
-            players2: ["Player B1", "Player B2", "Player B3", "Player B4", "Player B5", "Player B6", "Player B7", "Player B8", "Player B9", "Player B10", "Player B11"],
+            players1: ["Player E1", "Player E2", "Player E3", "Player E4", "Player E5"],
+            players2: ["Player F1", "Player F2", "Player F3", "Player F4", "Player F5"],
           ),
-          ScoreCard(
+          KabaddiScoreCard(
             teamName1: "Team I",
             teamName2: "Team J",
-            runs1: 89,
-            wickets1: 7,
-            overs1: 11.3,
-            maxOvers1: 20,
-            runs2: 90,
-            wickets2: 3,
-            overs2: 9.5,
-            maxOvers2: 20,
+            setScores1: [25, 22],
+            setScores2: [21, 24],
             matchStatus: "",
-            players1: ["Player A1", "Player A2", "Player A3", "Player A4", "Player A5", "Player A6", "Player A7", "Player A8", "Player A9", "Player A10", "Player A11"],
-            players2: ["Player B1", "Player B2", "Player B3", "Player B4", "Player B5", "Player B6", "Player B7", "Player B8", "Player B9", "Player B10", "Player B11"],
+            players1: ["Player E1", "Player E2", "Player E3", "Player E4", "Player E5"],
+            players2: ["Player F1", "Player F2", "Player F3", "Player F4", "Player F5"],
           ),
-          //
-          //
-          //
-          //
-          // Add more ScoreCards here...
         ],
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: CricketScorePage(),
-  ));
 }

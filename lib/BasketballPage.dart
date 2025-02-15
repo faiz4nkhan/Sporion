@@ -1,207 +1,134 @@
 import 'package:flutter/material.dart';
+import 'package:livebuzz/detail1.dart'; // Import the Detail1 page
 
-class BasketballPage extends StatefulWidget {
-  final bool isLoggedIn;
-
-  BasketballPage({required this.isLoggedIn});
-
-  @override
-  _BasketballPageState createState() => _BasketballPageState();
-}
-
-class _BasketballPageState extends State<BasketballPage> {
-  int teamAScore = 0;
-  int teamBScore = 0;
-  int period = 1;
-
-  void _updateScore(String team, int points) {
-    if (widget.isLoggedIn) {
-      setState(() {
-        if (team == 'A') {
-          teamAScore += points;
-        } else if (team == 'B') {
-          teamBScore += points;
-        }
-      });
-    } else {
-      _showUnauthorizedMessage();
-    }
-  }
-
-  void _resetScores() {
-    if (widget.isLoggedIn) {
-      setState(() {
-        teamAScore = 0;
-        teamBScore = 0;
-        period = 1;
-      });
-    } else {
-      _showUnauthorizedMessage();
-    }
-  }
-
-  void _nextPeriod() {
-    if (widget.isLoggedIn) {
-      setState(() {
-        if (period < 4) {
-          period++;
-        }
-      });
-    } else {
-      _showUnauthorizedMessage();
-    }
-  }
-
-  void _showUnauthorizedMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('You must log in to perform this action!')),
-    );
-  }
+class BasketballPage extends StatelessWidget {
+  final List<Map<String, dynamic>> matches = [
+    {
+      "team1": "Lakers",
+      "team2": "Bulls",
+      "score1": 85,
+      "score2": 79,
+      "players1": ["LeBron", "Davis", "Westbrook", "Schroder", "Tucker","LeBron", "Davis", "Westbrook", "Schroder", "Tucker"],
+      "players2": ["Zach LaVine", "DeRozan", "Vucevic", "Caruso", "Williams","LaVine", "DeRozan", "Vucevic", "Caruso", "Williams"]
+    },
+    {
+      "team1": "Warriors",
+      "team2": "Heat",
+      "score1": 92,
+      "score2": 88,
+      "players1": ["Curry", "Thompson", "Green", "Wiggins", "Poole"],
+      "players2": ["Butler", "Adebayo", "Lowry", "Herro", "Vincent"]
+    },
+    {
+      "team1": "Celtics",
+      "team2": "Knicks",
+      "score1": 101,
+      "score2": 97,
+      "players1": ["Tatum", "Brown", "Smart", "Horford", "Williams"],
+      "players2": ["Barrett", "Randle", "Brunson", "Quickley", "Robinson"]
+    },
+    {
+      "team1": "king",
+      "team2": "Knights",
+      "score1": 89,
+      "score2": 91,
+      "players1": ["Tatum", "Brown", "Smart", "Horford", "Williams"],
+      "players2": ["Barrett", "Randle", "Brunson", "Quickley", "Robinson"]
+    },
+    {
+      "team1": "bulls",
+      "team2": "heat",
+      "score1": 44,
+      "score2": 62,
+      "players1": ["Tatum", "Brown", "Smart", "Horford", "Williams"],
+      "players2": ["Barrett", "Randle", "Brunson", "Quickley", "Robinson"]
+    },
+    {
+      "team1": "king",
+      "team2": "lakers",
+      "score1": 89,
+      "score2": 91,
+      "players1": ["Tatum", "Brown", "Smart", "Horford", "Williams"],
+      "players2": ["Barrett", "Randle", "Brunson", "Quickley", "Robinson"]
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Basketball Scoreboard'),
-        backgroundColor: Colors.blueAccent,
+        title: Text("Basketball Matches"),
+        backgroundColor: Colors.blue,
       ),
-      body: widget.isLoggedIn
-          ? SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              'Period: $period',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Team A
-                Flexible(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        backgroundImage:
-                        AssetImage('assets/images/teamA.jpg'),
-                        radius: 50,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Team A',
-                        style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        '$teamAScore',
-                        style: TextStyle(fontSize: 48, color: Colors.green),
-                      ),
-                      SizedBox(height: 10),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () => _updateScore('A', 1),
-                              child: Text('+1'),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            ElevatedButton(
-                              onPressed: () => _updateScore('A', 2),
-                              child: Text('+2'),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            ElevatedButton(
-                              onPressed: () => _updateScore('A', 3),
-                              child: Text('+3'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+      body: Padding(
+        padding: EdgeInsets.all(10),
+        child: ListView.builder(
+          itemCount: matches.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => detail1(
+                      team1: matches[index]["team1"],
+                      team2: matches[index]["team2"],
+                      score1: matches[index]["score1"],
+                      score2: matches[index]["score2"],
+                      players1: matches[index]["players1"],
+                      players2: matches[index]["players2"],
+                    ),
                   ),
-                ),
-                // Team B
-                Flexible(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        backgroundImage:
-                        AssetImage('assets/images/teamB.jpg'),
-                        radius: 50,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Team B',
-                        style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        '$teamBScore',
-                        style: TextStyle(fontSize: 48, color: Colors.red),
-                      ),
-                      SizedBox(height: 10),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () => _updateScore('B', 1),
-                              child: Text('+1'),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            ElevatedButton(
-                              onPressed: () => _updateScore('B', 2),
-                              child: Text('+2'),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            ElevatedButton(
-                              onPressed: () => _updateScore('B', 3),
-                              child: Text('+3'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _resetScores,
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800]),
-                  child: Text('Reset', style: TextStyle(color: Colors.white)),
-                ),
-                SizedBox(width: screenWidth * 0.04),
-                ElevatedButton(
-                  onPressed: _nextPeriod,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  child: Text('Next Period'),
-                ),
-              ],
-            ),
-          ],
+                );
+              },
+              child: MatchCard(
+                team1: matches[index]["team1"],
+                team2: matches[index]["team2"],
+                score1: matches[index]["score1"],
+                score2: matches[index]["score2"],
+              ),
+            );
+          },
         ),
-      )
-          : Center(
-        child: Text(
-          'You must log in to view this page!',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+      ),
+    );
+  }
+}
+
+class MatchCard extends StatelessWidget {
+  final String team1, team2;
+  final int score1, score2;
+
+  MatchCard({
+    required this.team1,
+    required this.team2,
+    required this.score1,
+    required this.score2,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 5)],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "$team1 vs $team2",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+          ),
+          SizedBox(height: 10),
+          Text(
+            "$score1 - $score2",
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue.shade700),
+          ),
+        ],
       ),
     );
   }

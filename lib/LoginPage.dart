@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:livebuzz/UpdatePage.dart'; // Ensure this import is correct
+import 'package:livebuzz/Games/BasketballPage.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -7,21 +7,17 @@ class LoginPage extends StatelessWidget {
     final TextEditingController usernameController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
-    // Login handler function
     void handleLogin() {
-      // Check for username and password
       if (usernameController.text == "admin" && passwordController.text == "admin") {
-        // Navigate to the BasketballPage if credentials are correct
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => UpdatePage(isLoggedIn: true,), // Pass isLoggedIn if needed
+            builder: (context) => BasketballPage(isLoggedIn: true,isAdmin: false,),
           ),
         );
       } else {
-        // Show error message if credentials are wrong
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid password')),
+          SnackBar(content: Text('Invalid credentials!')),
         );
       }
     }
@@ -47,9 +43,7 @@ class LoginPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                handleLogin();  // Call the handleLogin method to validate credentials
-              },
+              onPressed: handleLogin,
               child: Text('Login'),
             ),
           ],

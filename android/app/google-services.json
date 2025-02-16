@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "61605657257",
+    "project_id": "sporion25-e93e7",
+    "storage_bucket": "sporion25-e93e7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:61605657257:android:d632ea629f7fe4863047b8",
+        "android_client_info": {
+          "package_name": "com.example.livebuzz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8jS19S8b9NPWCyPdMMwFzst6L34A-jJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

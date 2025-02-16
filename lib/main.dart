@@ -1,23 +1,28 @@
 
-import 'package:flutter/material.dart';
-import 'package:livebuzz/splash_screen.dart';
-import 'package:livebuzz/sports.dart';
-
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';// Ensure the correct import
+import 'package:livebuzz/Games/BasketballPage.dart';
+import 'package:livebuzz/Games/CricketScorePage.dart';
+import 'package:livebuzz/Games/FootballScorePage.dart';
 import 'package:livebuzz/LoginPage.dart';
-import 'package:livebuzz/news.dart';
+import 'package:livebuzz/ResultPage.dart';
+import 'package:livebuzz/Games/TennisScorePage.dart';
+import 'package:livebuzz/Games/VolleyballScorePage.dart';
+import 'package:livebuzz/sports.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-import 'package:livebuzz/TablesPage.dart';
-void main() {
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
   runApp(LiveBuzzApp());
 }
-
 class LiveBuzzApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Sporion',
+      title: 'SPORION',
       home: SplashScreen(), // Set SplashScreen as the initial screen.
     );
   }
@@ -29,11 +34,12 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
   @override
   void initState() {
     super.initState();
     // Navigate to LiveBuzzHomePage after 3 seconds.
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LiveBuzzHomePage()),
@@ -44,21 +50,18 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueAccent, // Background color for splash screen.
+      backgroundColor: Colors.pinkAccent, // Background color for splash screen.
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // App logo or placeholder icon
-            Icon(
-              Icons.sports_cricket_outlined,
-              size: 100,
-              color: Colors.white,
-            ),
+          //  Image.asset("assets//images//ball.png",color: Colors.white,),
+
             SizedBox(height: 20),
             // App name
             Text(
-              'Sporion',
+              'SPORION',
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
@@ -82,230 +85,345 @@ class LiveBuzzHomePage extends StatefulWidget {
   _LiveBuzzHomePageState createState() => _LiveBuzzHomePageState();
 }
 
-
-
 class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   int _selectedIndex = 0;
 
-  static List<Widget> _pages = <Widget>[
-    HomePageContent(),
-    SportsPage(),
-    Center(child: Text('Table Page', style: TextStyle(fontSize: 24))), // Placeholder for TablesPage
-    NewsPage(),
+  static const List<Widget> _pages = <Widget>[
+    Center(child: Text('Home Page', style: TextStyle(fontSize: 24))),
+    Center(child: Text('Sports  Page', style: TextStyle(fontSize: 24))),
+    Center(child: Text('Table Page', style: TextStyle(fontSize: 24))),
+    Center(child: Text('Statistics Page', style: TextStyle(fontSize: 24))),
   ];
 
   void _onItemTapped(int index) {
-    if (index == 1) { // Navigate to SportsPage
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SportsPage()),
-      );
-    } else if (index == 2) { // Navigate to TablesPage
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => TablesPage()),
-      );
-    } else if (index == 3) { // Navigate to NewsPage
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => NewsPage()),
-      );
-    } else {
-      setState(() {
-        _selectedIndex = index;
-      });
-    }
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.pinkAccent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
+        /*  leading: IconButton(
+          icon: Icon(Icons.menu, color: Colors.white),
+          onPressed: () {},
+        ),*/
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // LiveBuzz Logo (Placeholder Text)
+            Text(
+              'SPORION',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
-        title: Text(
-          'Sporion',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        centerTitle: true,
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()),);
             },
-            child: Text('Log In', style: TextStyle(color: Colors.white)),
+            child: Text(
+              'Log In',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
-      body: _pages[_selectedIndex],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container( width:double.infinity, // Or any other specific size
+              height: 400,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/football.jpg"), // Provide your image asset path here
+                  fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  children: [SizedBox(height: 100,),
+                    Text("Sporion 2025",style: TextStyle(fontSize: 25,color: Colors.white),),
+                    SizedBox(height: 20,),
+                    Text("GEC Jhalawar's Premier Sports \nTournament",style: TextStyle(fontSize: 15,color: Colors.white),),
+                    SizedBox(height: 20,),
+                    Row(
+                      children: [  SizedBox(width: 60,),
+                        ElevatedButton(onPressed: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) =>LoginPage()),);
+
+                        },
+                            style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30), // Rounded corners
+                            ), padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Padding
+                              elevation: 10, // Shadow elevation
+                            ).copyWith(
+                              backgroundColor:  MaterialStateProperty.all(Colors.pinkAccent), // Ensures transparency for gradient
+                            ),
+                            child: Text("Register Now",style: TextStyle(color: Colors.white))) ,
+                        SizedBox(width: 20,),
+                        ElevatedButton(onPressed: (){}, style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30), // Rounded corners
+                        ), padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Padding
+                          elevation: 10, // Shadow elevation
+                        ).copyWith(
+                          backgroundColor:  MaterialStateProperty.all(Colors.pinkAccent), // Ensures transparency for gradient
+                        ), child: Text("View Schedule",style: TextStyle(color: Colors.white),)) ,
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 50,),
+            Container(height: 1650,width: 350,
+              decoration: BoxDecoration(
+                color: Colors.white, // container color
+                borderRadius: BorderRadius.circular(12), // optional rounded corners
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2), // shadow color
+                    spreadRadius: 5, // how much the shadow spreads
+                    blurRadius: 7, // how blurred the shadow is
+                    offset: Offset(0, 3), // shadow position (x, y)
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(width: 20,),
+                      Text("Matches",style: TextStyle(fontSize: 25),),
+                      SizedBox(width: 130,height: 80,),
+                      // Icon(Icons.sports)
+                    ],
+                  ),
+                  SizedBox(height: 30,),
+                  InkWell(
+                    child: Container(height: 250,width: 250,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/cricket-bat-ball-foreground-pitch.jpg"), // Provide your image asset path here
+                          fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
+                        ),
+
+                        color: Colors.grey, // container color
+                        borderRadius: BorderRadius.circular(12), // optional rounded corners
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2), // shadow color
+                            spreadRadius: 5, // how much the shadow spreads
+                            blurRadius: 7, // how blurred the shadow is
+                            offset: Offset(0, 3), // shadow position (x, y)
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [SizedBox(width: 20,height: 50,),
+                              Text("CRICKET",style: TextStyle(color: Colors.black,fontSize: 18),)
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => CricketScorePage(isAdmin: false)),);
+                    },
+                  ),
+                  SizedBox(height: 60,),
+                  InkWell(
+                    child: Container(height: 250,width: 250,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/basketball-hoop-with-blue-sky.jpg"), // Provide your image asset path here
+                          fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
+                        ),
+
+                        color: Colors.grey, // container color
+                        borderRadius: BorderRadius.circular(12), // optional rounded corners
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2), // shadow color
+                            spreadRadius: 5, // how much the shadow spreads
+                            blurRadius: 7, // how blurred the shadow is
+                            offset: Offset(0, 3), // shadow position (x, y)
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [SizedBox(width: 20,height: 50,),
+                              Text("BASKETBALL",style: TextStyle(color: Colors.black,fontSize: 18),)
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => BasketballPage(isLoggedIn: true, isAdmin: false)),);
+                    },
+                  ),
+                  SizedBox(height: 60,),
+                  InkWell(
+                    child: Container(height: 250,width: 250,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/football.jpg"), // Provide your image asset path here
+                          fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
+                        ),
+
+                        color: Colors.grey, // container color
+                        borderRadius: BorderRadius.circular(12), // optional rounded corners
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2), // shadow color
+                            spreadRadius: 5, // how much the shadow spreads
+                            blurRadius: 7, // how blurred the shadow is
+                            offset: Offset(0, 3), // shadow position (x, y)
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [SizedBox(width: 20,height: 50,),
+                              Text("FOOTBALL",style: TextStyle(color: Colors.black,fontSize: 18),)
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => FootballScorePage(isAdmin: false)),);
+                    },
+                  ),
+                  SizedBox(height: 60,),
+                  InkWell(
+                    child: Container(height: 250,width: 250,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/vollyball.jpg"), // Provide your image asset path here
+                          fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
+                        ),
+
+                        color: Colors.grey, // container color
+                        borderRadius: BorderRadius.circular(12), // optional rounded corners
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2), // shadow color
+                            spreadRadius: 5, // how much the shadow spreads
+                            blurRadius: 7, // how blurred the shadow is
+                            offset: Offset(0, 3), // shadow position (x, y)
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [SizedBox(width: 20,height: 50,),
+                              Text("VOLLYBALL",style: TextStyle(color: Colors.black,fontSize: 18),)
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => VolleyballScorePage(isAdmin: false)),);
+                    },
+                  ),
+                  SizedBox(height: 60,),
+                  InkWell(
+                    child: Container(height: 250,width: 250,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/images/tt.jpg"), // Provide your image asset path here
+                          fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
+                        ),
+
+                        color: Colors.grey, // container color
+                        borderRadius: BorderRadius.circular(12), // optional rounded corners
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2), // shadow color
+                            spreadRadius: 5, // how much the shadow spreads
+                            blurRadius: 7, // how blurred the shadow is
+                            offset: Offset(0, 3), // shadow position (x, y)
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [SizedBox(width: 20,height: 50,),
+                              Text("TENNIS",style: TextStyle(color: Colors.white,fontSize: 18),)
+
+                            ],),
+
+                        ],
+                      ),
+
+                    ),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => TennisScorePage(isAdmin: false)),);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 50,),
+
+          ],
+        ),
+      ) ,
+
+      //_pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.sports_volleyball_rounded), label: 'Sports'),
-          BottomNavigationBarItem(icon: Icon(Icons.point_of_sale_rounded), label: 'Tables'),
-          BottomNavigationBarItem(icon: Icon(Icons.view_comfortable), label: 'Statistics'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: InkWell(child: Icon(Icons.sports_volleyball_rounded),
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SportsPage()),);},),
+            label: 'Sports',),
+          /*  BottomNavigationBarItem(
+            icon: Icon(Icons.point_of_sale_rounded),
+            label: 'Tables',
+          ),*/
+          BottomNavigationBarItem(
+            icon: InkWell(child: Icon(Icons.view_comfortable),
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ResultPage(isAdmin: false)),);
+
+              },
+
+            ),
+            label: 'Result',
+          ),
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,
       ),
+
+
     );
   }
-}
-
-// TablesPage Widget
-/*class TablesPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Tables Page')),
-      body: Center(child: Text('This is the Tables Page', style: TextStyle(fontSize: 24))),
-    );
-  }
-}*/
-
-// 📌 Home Page Content with Live and Upcoming Matches
-class HomePageContent extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔴 LIVE MATCHES SECTION
-            Text(
-              '🔴 Live Matches',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            _buildMatchList(isLive: true), // Live Matches
-
-            SizedBox(height: 20), // Space between sections
-
-            // ⏳ UPCOMING MATCHES SECTION
-            Text(
-              '⏳ Upcoming Matches',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            _buildMatchList(isLive: false), // Upcoming Matches
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 🏏🏀🏐 FUNCTION TO GENERATE MATCH LIST (LIVE OR UPCOMING)
-  static Widget _buildMatchList({required bool isLive}) {
-    List<Map<String, String>> matches = [
-      {"sport": "Cricket", "teams": "Team A vs Team B", "time": "10:30 AM"},
-      {"sport": "Basketball", "teams": "Lakers vs Bulls", "time": "12:00 PM"},
-      {"sport": "Volleyball", "teams": "Team X vs Team Y", "time": "2:00 PM"},
-    ];
-
-    return Column(
-      children: matches.map((match) {
-        return _buildMatchCard(
-          sport: match["sport"]!,
-          teams: match["teams"]!,
-          time: match["time"]!,
-          isLive: isLive,
-        );
-      }).toList(),
-    );
-  }
-
-  // 🎟 MATCH CARD WIDGET
-  static Widget _buildMatchCard(
-      {required String sport,
-        required String teams,
-        required String time,
-        required bool isLive}) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 3,
-      margin: EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        leading: Icon(
-          Icons.sports,
-          color: isLive ? Colors.red : Colors.grey, // Red for live matches
-          size: 30,
-        ),
-        title: Text(
-          sport,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(teams, style: TextStyle(fontSize: 16)),
-            SizedBox(height: 5),
-            Text(isLive ? 'LIVE 🔴' : 'Starts at: $time',
-                style: TextStyle(
-                    fontSize: 14,
-                    color: isLive ? Colors.red : Colors.black54,
-                    fontWeight: FontWeight.bold)),
-          ],
-        ),
-        trailing: Icon(Icons.arrow_forward_ios, size: 20),
-        onTap: () {
-          // Action when match card is tapped
-        },
-      ),
-    );
-  }
-}
-
-
-class BlankPage extends StatelessWidget {
-  _buildContent(){
-
-  }
-
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          // Date Selector Row
-          Container(
-            color: Colors.grey[900],
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildDateButton("Yesterday"),
-                _buildDateButton("Today"),
-                _buildDateButton("Tomorrow"),
-              ],
-            ),
-          ),
-          _buildContent(),
-          // Content related to the selected date
-
-        ],
-      ),
-    );
-  }
-
-  _buildDateButton(String s) {}
 }
 
 

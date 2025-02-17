@@ -1,5 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // To work with JSON responses
 
 class BasketballPage extends StatefulWidget {
   final bool isLoggedIn;
@@ -21,52 +22,40 @@ class _BasketballPageState extends State<BasketballPage> {
 
   int _selectedIndex = 0; // Track selected tab for the bottom navigation
 
-  // Real-time reference to Firestore match
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late DocumentReference matchRef;
-
   // Text editing controllers for team names and scores
   TextEditingController teamAController = TextEditingController();
   TextEditingController teamBController = TextEditingController();
   TextEditingController teamAScoreController = TextEditingController();
   TextEditingController teamBScoreController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
+  // API endpoint (replace with actual API URL)
+  final String apiUrl = "https://example.com/api/matches";
 
-    // Set Firestore reference to match document (could be dynamic)
-    matchRef = _firestore.collection('basketballmatches').doc(matchId);
-
-    // Real-time listener for score and team name updates
-    matchRef.snapshots().listen((snapshot) {
-      if (snapshot.exists) {
-        setState(() {
-          teamAScore = snapshot['teamAScore'];
-          teamBScore = snapshot['teamBScore'];
-          period = snapshot['period'];
-          teamAName = snapshot['teamAName'];
-          teamBName = snapshot['teamBName'];
-        });
-      }
-    });
+  // Fetch match data from the API
+  Future<List<dynamic>> _fetchMatches(String status) async {
+    final response = await http.get(Uri.parse('$apiUrl?status=$status'));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load matches');
+    }
   }
 
-  // Update team names and scores in Firebase
-  void _updateMatchDetails() {
+  // Delete a match using its ID (admin only)
+  Future<void> _deleteMatch(String matchId) async {
     if (widget.isAdmin) {
-      // Update team names and scores in Firestore
-      matchRef.update({
-        'teamAName': teamAController.text,
-        'teamBName': teamBController.text,
-        'teamAScore': teamAScore,
-        'teamBScore': teamBScore,
-        'period': period,
-      });
-      setState(() {
-        teamAName = teamAController.text;
-        teamBName = teamBController.text;
-      });
+      final response = await http.delete(
+        Uri.parse('$apiUrl/$matchId'),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Match Deleted')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete match')),
+        );
+      }
     } else {
       _showUnauthorizedMessage();
     }
@@ -78,66 +67,28 @@ class _BasketballPageState extends State<BasketballPage> {
       SnackBar(content: Text('You must be an admin to perform this action!')),
     );
   }
+// Positive button for admin to add/update team names and scores
 
-  // Positive button for admin to add/update team names and scores
-  void _onPositiveButtonPressed() {
-    _showDialogToAddDetails();
-  }
-
-  // Show dialog for adding team names and scores
-  void _showDialogToAddDetails() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Update Team Names and Scores'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: teamAController,
-                decoration: InputDecoration(labelText: 'Team A Name'),
-              ),
-              TextField(
-                controller: teamBController,
-                decoration: InputDecoration(labelText: 'Team B Name'),
-              ),
-              TextField(
-                controller: teamAScoreController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team A Score'),
-              ),
-              TextField(
-                controller: teamBScoreController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team B Score'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                _updateMatchDetails();
-                Navigator.of(context).pop();
-              },
-              child: Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
+  // Update match details (team names and scores) via API
+  void _updateMatchDetails() {
+    if (widget.isAdmin) {
+      // Update match details in API
+      final matchData = {
+        'teamAName': teamAController.text,
+        'teamBName': teamBController.text,
+        'teamAScore': teamAScore,
+        'teamBScore': teamBScore,
+        'period': period,
+      };
+      // Send update request to API
+      http.put(Uri.parse('$apiUrl/$matchId'), body: json.encode(matchData));
+    } else {
+      _showUnauthorizedMessage();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-
     return DefaultTabController(
       length: 3, // Number of tabs
       child: Scaffold(
@@ -264,14 +215,63 @@ class _BasketballPageState extends State<BasketballPage> {
       ),
     );
   }
+  void _showDialogToAddDetails() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Update Team Names and Scores'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: teamAController..text = teamAName,
+                decoration: InputDecoration(labelText: 'Team A Name'),
+              ),
+              TextField(
+                controller: teamBController..text = teamBName,
+                decoration: InputDecoration(labelText: 'Team B Name'),
+              ),
+              TextField(
+                controller: teamAScoreController..text = teamAScore.toString(),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team A Score'),
+              ),
+              TextField(
+                controller: teamBScoreController..text = teamBScore.toString(),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team B Score'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _updateMatchDetails();
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _onPositiveButtonPressed() {
+    _showDialogToAddDetails();
+  }
 
-  // Past matches page with real-time updates
+
+  // Past matches page with API data
   Widget _buildPastMatchesPage() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('basketballmatches')
-          .where('matchStatus', isEqualTo: 'completed')
-          .snapshots(),
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchMatches('completed'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -281,32 +281,22 @@ class _BasketballPageState extends State<BasketballPage> {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
 
-        if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
           return Center(child: Text('No completed matches'));
         }
 
         return ListView.builder(
-          itemCount: snapshot.data!.docs.length,
+          itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            var match = snapshot.data!.docs[index];
+            var match = snapshot.data![index];
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
               trailing: widget.isAdmin
                   ? IconButton(
                 icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () async {
-                  // Show confirmation dialog before deleting
-                  bool? confirmDelete = await _confirmDelete();
-                  if (confirmDelete == true) {
-                    await FirebaseFirestore.instance
-                        .collection('basketballmatches')
-                        .doc(match.id)
-                        .delete();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Match Deleted')),
-                    );
-                  }
+                onPressed: () {
+                  _deleteMatch(match['id']);
                 },
               )
                   : null, // Only show delete button if admin
@@ -317,40 +307,10 @@ class _BasketballPageState extends State<BasketballPage> {
     );
   }
 
-  // Confirm deletion for past match
-  Future<bool?> _confirmDelete() {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Confirm Deletion'),
-          content: Text('Are you sure you want to delete this match?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Upcoming matches page with real-time updates
+  // Upcoming matches page with API data
   Widget _buildUpcomingMatchesPage() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('basketballmatches')
-          .where('matchStatus', isEqualTo: 'upcoming')
-          .snapshots(),
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchMatches('upcoming'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -360,14 +320,14 @@ class _BasketballPageState extends State<BasketballPage> {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
 
-        if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
           return Center(child: Text('No upcoming matches'));
         }
 
         return ListView.builder(
-          itemCount: snapshot.data!.docs.length,
+          itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            var match = snapshot.data!.docs[index];
+            var match = snapshot.data![index];
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Date: ${match['date']}'),
@@ -378,3 +338,4 @@ class _BasketballPageState extends State<BasketballPage> {
     );
   }
 }
+// Show dialog for adding team names and scores

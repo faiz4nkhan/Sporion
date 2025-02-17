@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 class GameResult {
   final String gameType;
   final String teamA;
@@ -6,6 +9,7 @@ class GameResult {
   final String winner;
   final String scoreA;
   final String scoreB;
+  final String status;
 
   GameResult({
     required this.gameType,
@@ -14,9 +18,9 @@ class GameResult {
     required this.winner,
     required this.scoreA,
     required this.scoreB,
+    required this.status, // Added status field for live, upcoming, past
   });
 }
-
 
 void main() {
   runApp(MyApp());
@@ -49,9 +53,13 @@ class ResultPage extends StatefulWidget {
   _ResultPageState createState() => _ResultPageState();
 }
 
-class _ResultPageState extends State<ResultPage> {
+class _ResultPageState extends State<ResultPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   // List to hold all game results
-  List<GameResult> results = [];
+  List<GameResult> liveMatches = [];
+  List<GameResult> upcomingMatches = [];
+  List<GameResult> pastMatches = [];
 
   // Text Controllers for adding results
   final TextEditingController teamAController = TextEditingController();
@@ -60,17 +68,83 @@ class _ResultPageState extends State<ResultPage> {
   final TextEditingController scoreAController = TextEditingController();
   final TextEditingController scoreBController = TextEditingController();
   final TextEditingController gameTypeController = TextEditingController();
+  final String apiUrl = "https://your-api-endpoint.com"; // Replace with your API URL
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    fetchMatchData(); // Fetch match data when the page loads
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose(); // Dispose of the TabController when the widget is removed
+    super.dispose();
+  }
+
+  // Function to fetch match data from the API
+  Future<void> fetchMatchData() async {
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(json.decode(response.body));
+        setState(() {
+          liveMatches = data.where((match) => match['status'] == 'Live').map((match) {
+            return GameResult(
+              gameType: match['gameType'],
+              teamA: match['teamA'],
+              teamB: match['teamB'],
+              winner: match['winner'],
+              scoreA: match['scoreA'],
+              scoreB: match['scoreB'],
+              status: match['status'],
+            );
+          }).toList();
+
+          upcomingMatches = data.where((match) => match['status'] == 'Upcoming').map((match) {
+            return GameResult(
+              gameType: match['gameType'],
+              teamA: match['teamA'],
+              teamB: match['teamB'],
+              winner: match['winner'],
+              scoreA: match['scoreA'],
+              scoreB: match['scoreB'],
+              status: match['status'],
+            );
+          }).toList();
+
+          pastMatches = data.where((match) => match['status'] == 'Past').map((match) {
+            return GameResult(
+              gameType: match['gameType'],
+              teamA: match['teamA'],
+              teamB: match['teamB'],
+              winner: match['winner'],
+              scoreA: match['scoreA'],
+              scoreB: match['scoreB'],
+              status: match['status'],
+            );
+          }).toList();
+        });
+      } else {
+        throw Exception('Failed to load matches');
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
 
   // Function to add a new result
   void _addResult() {
     setState(() {
-      results.add(GameResult(
+      liveMatches.add(GameResult(
         gameType: gameTypeController.text,
         teamA: teamAController.text,
         teamB: teamBController.text,
         winner: winnerController.text,
         scoreA: scoreAController.text,
         scoreB: scoreBController.text,
+        status: 'Live', // Default status to Live
       ));
 
       // Clear text fields
@@ -83,96 +157,115 @@ class _ResultPageState extends State<ResultPage> {
     });
   }
 
+  // Function to show the admin dialog for adding and updating matches
+  void _showAdminDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Match Information'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: gameTypeController,
+                  decoration: InputDecoration(labelText: 'Game Type (e.g., Volleyball, Football, etc.)'),
+                ),
+                TextField(
+                  controller: teamAController,
+                  decoration: InputDecoration(labelText: 'Team A'),
+                ),
+                TextField(
+                  controller: teamBController,
+                  decoration: InputDecoration(labelText: 'Team B'),
+                ),
+                TextField(
+                  controller: winnerController,
+                  decoration: InputDecoration(labelText: 'Winner'),
+                ),
+                TextField(
+                  controller: scoreAController,
+                  decoration: InputDecoration(labelText: 'Score of Team A'),
+                ),
+                TextField(
+                  controller: scoreBController,
+                  decoration: InputDecoration(labelText: 'Score of Team B'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                _addResult(); // Add new result
+                Navigator.of(context).pop();
+              },
+              child: Text('Save Match Info'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Game Results'),
         backgroundColor: Colors.blue,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // If Admin, show form to add result
-            if (widget.isAdmin)
-              Card(
-                color: Colors.blue[50],
-                margin: EdgeInsets.symmetric(vertical: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Add New Result', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      TextField(
-                        controller: gameTypeController,
-                        decoration: InputDecoration(labelText: 'Game Type (e.g., Volleyball, Football, etc.)'),
-                      ),
-                      TextField(
-                        controller: teamAController,
-                        decoration: InputDecoration(labelText: 'Team A'),
-                      ),
-                      TextField(
-                        controller: teamBController,
-                        decoration: InputDecoration(labelText: 'Team B'),
-                      ),
-                      TextField(
-                        controller: winnerController,
-                        decoration: InputDecoration(labelText: 'Winner'),
-                      ),
-                      TextField(
-                        controller: scoreAController,
-                        decoration: InputDecoration(labelText: 'Score of Team A'),
-                      ),
-                      TextField(
-                        controller: scoreBController,
-                        decoration: InputDecoration(labelText: 'Score of Team B'),
-                      ),
-                      SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: _addResult,
-                        child: Text('Add Result'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            SizedBox(height: 20),
-            // Results List for All Users
-            Text('Results:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: results.length,
-              itemBuilder: (context, index) {
-                final result = results[index];
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 5),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Row(
-                      children: [
-                        // Display Game Type, Teams, Winner, and Scores
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Game Type: ${result.gameType}', style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text('Teams: ${result.teamA} vs ${result.teamB}'),
-                            Text('Winner: ${result.winner}'),
-                            Text('Score: ${result.scoreA} - ${result.scoreB}'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'Live'),
+            Tab(text: 'Upcoming'),
+            Tab(text: 'Past'),
           ],
         ),
       ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          buildMatchListTab(liveMatches),
+          buildMatchListTab(upcomingMatches),
+          buildMatchListTab(pastMatches),
+        ],
+      ),
+      floatingActionButton: widget.isAdmin
+          ? FloatingActionButton(
+        onPressed: _showAdminDialog, // Show the admin dialog to add or update match info
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blue[700],
+      )
+          : null, // Only show the button if the user is an admin
+    );
+  }
+
+  // Function to build the match list based on match status (Live, Upcoming, Past)
+  Widget buildMatchListTab(List<GameResult> matches) {
+    return ListView.builder(
+      itemCount: matches.length,
+      itemBuilder: (context, index) {
+        final result = matches[index];
+        return Card(
+          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          color: Colors.blue[50],
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${result.gameType}'),
+                Text('${result.teamA} vs ${result.teamB}'),
+                Text('Winner: ${result.winner}'),
+                Text('Score: ${result.scoreA} - ${result.scoreB}'),
+                Text('Status: ${result.status}'),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
-

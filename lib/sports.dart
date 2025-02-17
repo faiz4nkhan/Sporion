@@ -101,7 +101,7 @@ class SportsPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TennisScorePage( isAdmin: false), // Navigate to TennisScorePage
+                      builder: (context) => TennisScorePage( isAdmin: true), // Navigate to TennisScorePage
                     ),
                   );
                 } else {

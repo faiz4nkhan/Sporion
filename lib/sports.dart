@@ -73,7 +73,7 @@ class SportsPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BasketballPage(isLoggedIn: true, isAdmin:true),
+                      builder: (context) => BasketballPage(isLoggedIn: true, isAdmin: true),
                     ),
                   );
                 } else if (sports[index]['name'] == 'Cricket') {
@@ -87,7 +87,7 @@ class SportsPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => VolleyballScorePage(isAdmin: false),
+                      builder: (context) => VolleyballScorePage(isAdmin: true),
                     ),
                   );
                 } else if (sports[index]['name'] == 'Football') {

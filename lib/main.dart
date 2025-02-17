@@ -56,8 +56,8 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // App logo or placeholder icon
-          //  Image.asset("assets//images//ball.png",color: Colors.white,),
-
+            Image.asset("assets/images/ball.png",color: Colors.white,),
+//Image(image: AssetImage("assets/images/ball.png",)),
             SizedBox(height: 20),
             // App name
             Text(
@@ -272,7 +272,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       ),
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => BasketballPage(isLoggedIn: true, isAdmin: false)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => BasketballPage(isLoggedIn: true,isAdmin: false )));
                     },
                   ),
                   SizedBox(height: 60,),

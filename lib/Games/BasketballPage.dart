@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class BasketballPage extends StatefulWidget {
   final bool isLoggedIn;
-  final bool isAdmin; // Added isAdmin flag
+  final bool isAdmin; // Admin flag
 
   BasketballPage({required this.isLoggedIn, required this.isAdmin});
 
@@ -14,72 +15,123 @@ class _BasketballPageState extends State<BasketballPage> {
   int teamAScore = 0;
   int teamBScore = 0;
   int period = 1;
+  String teamAName = "Team A";
+  String teamBName = "Team B";
+  String matchId = "match1"; // Match document ID
 
-  int _selectedIndex = 0; // Track the selected tab for the bottom navigation
+  int _selectedIndex = 0; // Track selected tab for the bottom navigation
 
-  // Update the score based on the team
-  void _updateScore(String team, int points) {
+  // Real-time reference to Firestore match
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late DocumentReference matchRef;
+
+  // Text editing controllers for team names and scores
+  TextEditingController teamAController = TextEditingController();
+  TextEditingController teamBController = TextEditingController();
+  TextEditingController teamAScoreController = TextEditingController();
+  TextEditingController teamBScoreController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Set Firestore reference to match document (could be dynamic)
+    matchRef = _firestore.collection('basketballmatches').doc(matchId);
+
+    // Real-time listener for score and team name updates
+    matchRef.snapshots().listen((snapshot) {
+      if (snapshot.exists) {
+        setState(() {
+          teamAScore = snapshot['teamAScore'];
+          teamBScore = snapshot['teamBScore'];
+          period = snapshot['period'];
+          teamAName = snapshot['teamAName'];
+          teamBName = snapshot['teamBName'];
+        });
+      }
+    });
+  }
+
+  // Update team names and scores in Firebase
+  void _updateMatchDetails() {
     if (widget.isAdmin) {
+      // Update team names and scores in Firestore
+      matchRef.update({
+        'teamAName': teamAController.text,
+        'teamBName': teamBController.text,
+        'teamAScore': teamAScore,
+        'teamBScore': teamBScore,
+        'period': period,
+      });
       setState(() {
-        if (team == 'A') {
-          teamAScore += points;
-        } else if (team == 'B') {
-          teamBScore += points;
-        }
+        teamAName = teamAController.text;
+        teamBName = teamBController.text;
       });
     } else {
       _showUnauthorizedMessage();
     }
   }
 
-  void _resetScores() {
-    if (widget.isAdmin) {
-      setState(() {
-        teamAScore = 0;
-        teamBScore = 0;
-        period = 1;
-      });
-    } else {
-      _showUnauthorizedMessage();
-    }
-  }
-
-  void _nextPeriod() {
-    if (widget.isAdmin) {
-      setState(() {
-        if (period < 4) {
-          period++;
-        }
-      });
-    } else {
-      _showUnauthorizedMessage();
-    }
-  }
-
-  // Delete all scores (reset scores and period)
-  void _deleteScores() {
-    if (widget.isAdmin) {
-      setState(() {
-        teamAScore = 0;
-        teamBScore = 0;
-        period = 1; // Reset period as well
-      });
-    } else {
-      _showUnauthorizedMessage();
-    }
-  }
-
+  // Show message if the user is unauthorized
   void _showUnauthorizedMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('You must be an admin to perform this action!')),
     );
   }
 
-  // Change the selected tab in the bottom navigation
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  // Positive button for admin to add/update team names and scores
+  void _onPositiveButtonPressed() {
+    _showDialogToAddDetails();
+  }
+
+  // Show dialog for adding team names and scores
+  void _showDialogToAddDetails() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Update Team Names and Scores'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: teamAController,
+                decoration: InputDecoration(labelText: 'Team A Name'),
+              ),
+              TextField(
+                controller: teamBController,
+                decoration: InputDecoration(labelText: 'Team B Name'),
+              ),
+              TextField(
+                controller: teamAScoreController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team A Score'),
+              ),
+              TextField(
+                controller: teamBScoreController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team B Score'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _updateMatchDetails();
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -109,6 +161,13 @@ class _BasketballPageState extends State<BasketballPage> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
+        floatingActionButton: widget.isAdmin
+            ? FloatingActionButton(
+          onPressed: _onPositiveButtonPressed,
+          backgroundColor: Colors.green,
+          child: Icon(Icons.add),
+        )
+            : null, // Show only for admins
       ),
     );
   }
@@ -117,20 +176,18 @@ class _BasketballPageState extends State<BasketballPage> {
   Widget _getSelectedPage(int index) {
     switch (index) {
       case 0:
-        return _buildLivePage();
+        return _buildPastMatchesPage();
       case 1:
-        return _buildCompletedPage();
+        return _buildUpcomingMatchesPage();
       case 2:
-        return _buildUpcomingPage();
+        return _buildLivePage();
       default:
         return _buildLivePage();
     }
   }
 
-  // LIVE page content
+  // Live page content with real-time score updates
   Widget _buildLivePage() {
-    final double screenWidth = MediaQuery.of(context).size.width;
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -139,6 +196,30 @@ class _BasketballPageState extends State<BasketballPage> {
             'Period: $period',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
+          SizedBox(height: 20),
+          // Team Names Editing Section (Admin Only)
+          if (widget.isAdmin)
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: teamAController..text = teamAName,
+                    decoration: InputDecoration(labelText: 'Team A Name'),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: teamBController..text = teamBName,
+                    decoration: InputDecoration(labelText: 'Team B Name'),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.save),
+                  onPressed: _updateMatchDetails,
+                ),
+              ],
+            ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -149,7 +230,7 @@ class _BasketballPageState extends State<BasketballPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Team A',
+                      teamAName,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
@@ -157,31 +238,6 @@ class _BasketballPageState extends State<BasketballPage> {
                       '$teamAScore',
                       style: TextStyle(fontSize: 48, color: Colors.green),
                     ),
-                    SizedBox(height: 10),
-                    // Update Score Buttons (Only visible if admin)
-                    if (widget.isAdmin)
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () => _updateScore('A', 1),
-                              child: Text('+1'),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            ElevatedButton(
-                              onPressed: () => _updateScore('A', 2),
-                              child: Text('+2'),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            ElevatedButton(
-                              onPressed: () => _updateScore('A', 3),
-                              child: Text('+3'),
-                            ),
-                          ],
-                        ),
-                      ),
                   ],
                 ),
               ),
@@ -191,7 +247,7 @@ class _BasketballPageState extends State<BasketballPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Team B',
+                      teamBName,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
@@ -199,84 +255,126 @@ class _BasketballPageState extends State<BasketballPage> {
                       '$teamBScore',
                       style: TextStyle(fontSize: 48, color: Colors.red),
                     ),
-                    SizedBox(height: 10),
-                    // Update Score Buttons (Only visible if admin)
-                    if (widget.isAdmin)
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () => _updateScore('B', 1),
-                              child: Text('+1'),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            ElevatedButton(
-                              onPressed: () => _updateScore('B', 2),
-                              child: Text('+2'),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            ElevatedButton(
-                              onPressed: () => _updateScore('B', 3),
-                              child: Text('+3'),
-                            ),
-                          ],
-                        ),
-                      ),
                   ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 20),
-          // Control Buttons (Only visible if admin)
-          if (widget.isAdmin)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _resetScores,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[800]),
-                  child: Text('Reset', style: TextStyle(color: Colors.white)),
-                ),
-                SizedBox(width: screenWidth * 0.04),
-                ElevatedButton(
-                  onPressed: _nextPeriod,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  child: Text('Next Period'),
-                ),
-                SizedBox(width: screenWidth * 0.04),
-                ElevatedButton(
-                  onPressed: _deleteScores,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  child: Text('Delete Scores'),
-                ),
-              ],
-            ),
         ],
       ),
     );
   }
 
-  // COMPLETED page content (Placeholder)
-  Widget _buildCompletedPage() {
-    return Center(
-      child: Text(
-        'Completed Games will be displayed here.',
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
+  // Past matches page with real-time updates
+  Widget _buildPastMatchesPage() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('basketballmatches')
+          .where('matchStatus', isEqualTo: 'completed')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('No completed matches'));
+        }
+
+        return ListView.builder(
+          itemCount: snapshot.data!.docs.length,
+          itemBuilder: (context, index) {
+            var match = snapshot.data!.docs[index];
+            return ListTile(
+              title: Text('${match['teamAName']} vs ${match['teamBName']}'),
+              subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
+              trailing: widget.isAdmin
+                  ? IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () async {
+                  // Show confirmation dialog before deleting
+                  bool? confirmDelete = await _confirmDelete();
+                  if (confirmDelete == true) {
+                    await FirebaseFirestore.instance
+                        .collection('basketballmatches')
+                        .doc(match.id)
+                        .delete();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Match Deleted')),
+                    );
+                  }
+                },
+              )
+                  : null, // Only show delete button if admin
+            );
+          },
+        );
+      },
     );
   }
 
-  // UPCOMING page content (Placeholder)
-  Widget _buildUpcomingPage() {
-    return Center(
-      child: Text(
-        'Upcoming Games will be displayed here.',
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
+  // Confirm deletion for past match
+  Future<bool?> _confirmDelete() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion'),
+          content: Text('Are you sure you want to delete this match?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Upcoming matches page with real-time updates
+  Widget _buildUpcomingMatchesPage() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('basketballmatches')
+          .where('matchStatus', isEqualTo: 'upcoming')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('No upcoming matches'));
+        }
+
+        return ListView.builder(
+          itemCount: snapshot.data!.docs.length,
+          itemBuilder: (context, index) {
+            var match = snapshot.data!.docs[index];
+            return ListTile(
+              title: Text('${match['teamAName']} vs ${match['teamBName']}'),
+              subtitle: Text('Date: ${match['date']}'),
+            );
+          },
+        );
+      },
     );
   }
 }
-

@@ -1,216 +1,317 @@
-import 'dart:convert';
-import 'dart:async';
+import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-void main() {
-  runApp(VolleyballScoreApp());
-}
-
-class ApiService {
-  final String baseUrl = 'https://your-api-url.com'; // Replace with your API base URL
-
-  // Function to fetch all match data
-  Future<List<Map<String, dynamic>>> getMatches() async {
-    try {
-      final response = await http.get(Uri.parse('$baseUrl/matches'));
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-        return data.map((match) => match as Map<String, dynamic>).toList();
-      } else {
-        throw Exception('Failed to load matches');
-      }
-    } catch (e) {
-      print("Error fetching match data: $e");
-      return [];
-    }
-  }
-
-  // Function to save match data (for adding new match)
-  Future<void> saveMatchData(Map<String, dynamic> matchData) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/matches'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(matchData),
-      );
-      if (response.statusCode != 201) {
-        throw Exception('Failed to add match');
-      }
-    } catch (e) {
-      print("Error saving match data: $e");
-    }
-  }
-
-  // Function to update match data
-  Future<void> updateMatchData(String matchId, Map<String, dynamic> matchData) async {
-    try {
-      final response = await http.put(
-        Uri.parse('$baseUrl/matches/$matchId'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(matchData),
-      );
-      if (response.statusCode != 200) {
-        throw Exception('Failed to update match');
-      }
-    } catch (e) {
-      print("Error updating match data: $e");
-    }
-  }
-
-  // Function to delete match
-  Future<void> deleteMatch(String matchId) async {
-    try {
-      final response = await http.delete(Uri.parse('$baseUrl/matches/$matchId'));
-      if (response.statusCode != 200) {
-        throw Exception('Failed to delete match');
-      }
-    } catch (e) {
-      print("Error deleting match: $e");
-    }
-  }
-}
-
-class VolleyballScoreApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Volleyball Score App',
-      theme: ThemeData(
-        primaryColor: Colors.blue,
-        textTheme: TextTheme(bodyLarge: TextStyle(color: Colors.white)),
-        colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.amber),
-      ),
-      home: VolleyballScorePage(isAdmin: true), // Set isAdmin flag to true or false
-    );
-  }
-}
+import 'dart:convert';
 
 class VolleyballScorePage extends StatefulWidget {
-  final bool isAdmin; // Flag to differentiate between admin and user
+  final bool isLoggedIn;
+  final bool isAdmin;
 
-  VolleyballScorePage({required this.isAdmin});
+  VolleyballScorePage({required this.isLoggedIn, required this.isAdmin});
 
   @override
   _VolleyballScorePageState createState() => _VolleyballScorePageState();
 }
 
-class _VolleyballScorePageState extends State<VolleyballScorePage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final ApiService _apiService = ApiService();
-  final TextEditingController teamANameController = TextEditingController();
-  final TextEditingController teamBNameController = TextEditingController();
-  final TextEditingController matchStatusController = TextEditingController();
-  final TextEditingController teamAPointsController = TextEditingController();
-  final TextEditingController teamASetsController = TextEditingController();
-  final TextEditingController teamAGamesController = TextEditingController();
-  final TextEditingController teamBPointsController = TextEditingController();
-  final TextEditingController teamBSetsController = TextEditingController();
-  final TextEditingController teamBGamesController = TextEditingController();
-  late Timer _timer;
+class _VolleyballScorePageState extends State<VolleyballScorePage> {
+  int teamASPoints= 0;
+  int teamBPoints = 0;
+  int teamASets = 0;
+  int teamBSets = 0;
+  int teamAGames = 0;
+  int teamBGames = 0;
+  String teamAName = "Team A";
+  String teamBName = "Team B";
+  String matchId = "match1";
+  String matchStatus = "Status";
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this); // 3 tabs: Live, Upcoming, Past
-    _startPolling();
+  int _selectedIndex = 0;
+
+  TextEditingController teamANameController = TextEditingController();
+  TextEditingController teamBNameController = TextEditingController();
+  TextEditingController teamAPointsController = TextEditingController();
+  TextEditingController teamBPointsController = TextEditingController();
+  TextEditingController teamASetsController = TextEditingController();
+  TextEditingController teamBSetsController = TextEditingController();
+  TextEditingController teamAGamesController = TextEditingController();
+  TextEditingController teamBGamesController = TextEditingController();
+  TextEditingController matchStatuses = TextEditingController();
+  TextEditingController winners = TextEditingController();
+
+  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/basketball";
+
+  // Fetch match data from the API
+  Future<List<dynamic>> _fetchMatches(String status) async {
+    final String endpoint;
+    print(status);
+    if (status == 'live') {
+      endpoint = '$apiUrl/get-live';
+    }
+    else if (status == 'completed') {
+      endpoint = '$apiUrl/get-completed';
+    } else if (status == 'upcoming') {
+      endpoint = '$apiUrl/get-scheduled';
+    }  else {
+      throw Exception("Invalid match status: $status");
+    }
+    print(endpoint);
+
+    final response = await http.get(Uri.parse(endpoint));
+    print(response);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = json.decode(response.body);
+      print("sfdgsdf: $data,$status");
+      if (data is Map<String, dynamic> && data.containsKey('matches')) {
+        return data['matches'] as List<dynamic>;
+      } else {
+        throw Exception("Invalid data format: Expected a list under 'matches' key");
+      }
+    } else {
+      throw Exception('Failed to load matches');
+    }
   }
 
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
+  // Add a match using its details (admin only)
+  Future<void> _addMatch() async {
+    if (!widget.isAdmin) {
+      _showUnauthorizedMessage();
+      return;
+    }
+
+    final matchData = {
+      'teamAName': teamANameController.text,
+      'teamBName': teamBNameController.text,
+      'teamAPoints': int.tryParse(teamAPointsController.text) ?? 0,
+      'teamBPoints': int.tryParse(teamBPointsController.text) ?? 0,
+      'teamASets': int.tryParse(teamASetsController.text) ?? 0,
+      'teamBSets': int.tryParse(teamBSetsController.text) ?? 0,
+      'teamAGames': int.tryParse(teamAGamesController.text) ?? 0,
+      'teamBGames': int.tryParse(teamBGamesController.text) ?? 0,
+      'matchStatus': matchStatuses.text,
+      'winner': winners.text
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('$apiUrl/add-match'),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(matchData),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Match Added Successfully')));
+        setState(() {});
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add match')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 
-  // Function to start polling for real-time updates
-  void _startPolling() {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      setState(() {
-        // Trigger a re-fetch of data every 10 seconds
-      });
-    });
+  Future<void> _deleteMatch(String matchId) async {
+    if (!widget.isAdmin) {
+      _showUnauthorizedMessage();
+      return;
+    }
+
+    try {
+      final response = await http.delete(
+        Uri.parse('$apiUrl/delete-match/$matchId'),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Match Deleted Successfully')));
+        setState(() {});
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete match')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
+  void _showUnauthorizedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('You must be an admin to perform this action!')));
+  }
+
+  // Update match details (admin only)
+  void _updateMatchDetails() {
+    if (widget.isAdmin) {
+      final matchData = {
+        'teamAName': teamANameController.text,
+        'teamBName': teamBNameController.text,
+        'teamAPoints': teamAPointsController.text,
+        'teamBPoints': teamBPointsController.text,
+        'teamASets': teamASetsController.text,
+        'teamBSets': teamBSetsController.text,
+        'teamAGames': teamAGamesController.text,
+        'teamBGames': teamBGamesController.text,
+      };
+      http.put(Uri.parse('$apiUrl/$matchId'), body: json.encode(matchData));
+    } else {
+      _showUnauthorizedMessage();
+    }
+  }
+
+  void _showDialogToAddMatch() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add New Match'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: teamANameController,
+                decoration: InputDecoration(labelText: 'Team A Name'),
+              ),
+              TextField(
+                controller: teamBNameController,
+                decoration: InputDecoration(labelText: 'Team B Name'),
+              ),
+              TextField(
+                controller: teamAPointsController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team A Points'),
+              ),
+              TextField(
+                controller: teamBPointsController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team B Points'),
+              ),
+              TextField(
+                controller: teamASetsController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team A Sets'),
+              ),
+              TextField(
+                controller: teamBSetsController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team B Sets'),
+              ),
+              TextField(
+                controller: teamAGamesController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team A Games'),
+              ),
+              TextField(
+                controller: teamBGamesController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team B Games'),
+              ),
+
+
+              /* TextField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Period'),
+                onChanged: (value) => period = int.tryParse(value) ?? 1,
+              ),*/
+              TextField(
+                controller: matchStatuses,
+                decoration: InputDecoration(labelText: 'Match Status(eg:live,scheduled and completed)'),
+              ),
+              TextField(
+                controller: winners,
+                decoration: InputDecoration(labelText: 'Winner'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _addMatch();
+                Navigator.of(context).pop();
+              },
+              child: Text('Add Match'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.pinkAccent,
-        title: Text('Volleyball Score'),
-        centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'Live'),
-            Tab(text: 'Upcoming'),
-            Tab(text: 'Past'),
-          ],
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Vollyball Scoreboard'),
+          backgroundColor: Colors.pinkAccent,
+          centerTitle: true,
+
+          bottom: TabBar(
+            onTap: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            tabs: [
+              Tab(text: 'PAST MATCHES'),
+              Tab(text: 'UPCOMING'),
+              Tab(text: 'LIVE'),
+            ],
+          ),
         ),
+        body: widget.isLoggedIn ? _getSelectedPage(_selectedIndex) : Center(
+          child: Text('You must log in to view this page!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
+        floatingActionButton: widget.isAdmin ? FloatingActionButton(
+          onPressed: _showDialogToAddMatch,
+          backgroundColor: Colors.green,
+          child: Icon(Icons.add),
+        ) : null,
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          buildMatchListTab('live'),
-          buildMatchListTab('upcoming'),
-          buildMatchListTab('past'),
-        ],
-      ),
-      floatingActionButton: widget.isAdmin
-          ? FloatingActionButton(
-        onPressed: () {
-          _showAdminDialog();
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue[700],
-      )
-          : null, // No floating action button for non-admin users
     );
   }
 
-  // Function to build match list based on match status
-  Widget buildMatchListTab(String status) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _apiService.getMatches(),
+  Widget _getSelectedPage(int index) {
+    print(index);
+    switch (index) {
+      case 0: return _buildPastMatchesPage();
+      case 1: return _buildUpcomingMatchesPage();
+      case 2: return _buildLivePage();
+      default: return _buildLivePage();
+    }
+  }
+
+  Widget _buildLivePage() {
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchMatches('live'),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
 
-        final matches = snapshot.data!.where((doc) {
-          return doc['matchStatus'] == status;
-        }).toList();
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
 
-        if (matches.isEmpty) {
-          return Center(child: Text('No $status matches found.'));
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return Center(child: Text('No matches found'));
         }
 
         return ListView.builder(
-          itemCount: matches.length,
+          itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            var match = matches[index];
-            return Card(
-              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-              color: Colors.blue[50],
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${match['teamAName']} vs ${match['teamBName']}',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text('Status: ${match['matchStatus'] ?? 'Unknown'}', style: TextStyle(fontSize: 16)),
-                    Text('Team A Points: ${match['teamAPoints']}'),
-                    Text('Team B Points: ${match['teamBPoints']}'),
-                    Text('Team A Sets: ${match['teamASets']}'),
-                    Text('Team B Sets: ${match['teamBSets']}'),
-                    Text('Team A Games: ${match['teamAGames']}'),
-                    Text('Team B Games: ${match['teamBGames']}'),
-                  ],
-                ),
-              ),
+            var match = snapshot.data![index];
+            return ListTile(
+              title: Text('${match['teamAName']} vs ${match['teamBName']}'),
+              subtitle: Text('Points: ${match['teamAPoints']}/Sets: ${match['teamASets']} ,Games: ${match['teamBGames']}- ${match['teamBPoints']}/Sets: ${match['teamBSets']},Games: ${match['teamBGames']}'),
+              trailing: widget.isAdmin
+                  ? IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  _deleteMatch(match['_id']);
+                },
+              )
+                  : null,
             );
           },
         );
@@ -218,61 +319,81 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> with SingleTi
     );
   }
 
-  // Function to show admin dialog to add match data
-  void _showAdminDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add Match Information'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTextField(teamANameController, 'Enter Team A Name'),
-                _buildTextField(teamBNameController, 'Enter Team B Name'),
-                _buildTextField(matchStatusController, 'Match Status (Live, Upcoming, Past)'),
-                _buildTextField(teamAPointsController, 'Enter Team A Points', TextInputType.number),
-                _buildTextField(teamASetsController, 'Enter Team A Sets', TextInputType.number),
-                _buildTextField(teamAGamesController, 'Enter Team A Games', TextInputType.number),
-                _buildTextField(teamBPointsController, 'Enter Team B Points', TextInputType.number),
-                _buildTextField(teamBSetsController, 'Enter Team B Sets', TextInputType.number),
-                _buildTextField(teamBGamesController, 'Enter Team B Games', TextInputType.number),
-              ],
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Map<String, dynamic> matchData = {
-                  'teamAName': teamANameController.text,
-                  'teamBName': teamBNameController.text,
-                  'matchStatus': matchStatusController.text.isEmpty ? 'Upcoming' : matchStatusController.text,
-                  'teamAPoints': int.tryParse(teamAPointsController.text) ?? 0,
-                  'teamASets': int.tryParse(teamASetsController.text) ?? 0,
-                  'teamAGames': int.tryParse(teamAGamesController.text) ?? 0,
-                  'teamBPoints': int.tryParse(teamBPointsController.text) ?? 0,
-                  'teamBSets': int.tryParse(teamBSetsController.text) ?? 0,
-                  'teamBGames': int.tryParse(teamBGamesController.text) ?? 0,
-                };
 
-                _apiService.saveMatchData(matchData);
-                Navigator.of(context).pop();
-              },
-              child: Text('Save Match Info'),
-            ),
-          ],
+  Widget _buildPastMatchesPage() {
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchMatches('completed'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return Center(child: Text('No completed matches'));
+        }
+
+        return ListView.builder(
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            var match = snapshot.data![index];
+            return ListTile(
+              title: Text('${match['teamAName']} vs ${match['teamBName']}'),
+              //subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
+              subtitle: Text('Points: ${match['teamAPoints']}/Sets: ${match['teamASets']} ,Games: ${match['teamBGames']}- ${match['teamBPoints']}/Sets: ${match['teamBSets']},Games: ${match['teamBGames']}'),
+              trailing: widget.isAdmin
+                  ? IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  _deleteMatch(match['_id']);
+                },
+              )
+                  : null,
+            );
+          },
         );
       },
     );
   }
 
-  // Helper function to build text fields
-  Widget _buildTextField(TextEditingController controller, String labelText, [TextInputType keyboardType = TextInputType.text]) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(labelText: labelText),
+  Widget _buildUpcomingMatchesPage() {
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchMatches('upcoming'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return Center(child: Text('No upcoming matches'));
+        }
+
+        return ListView.builder(
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            var match = snapshot.data![index];
+            return ListTile(
+              title: Text('${match['teamAName']} vs ${match['teamBName']}'),
+              subtitle: Text('Date: ${match['date']}'),
+              trailing: widget.isAdmin
+                  ? IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  _deleteMatch(match['_id']);
+                },
+              )
+                  : null,
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -80,14 +80,14 @@ class SportsPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CricketScorePage(isAdmin : true),
+                      builder: (context) => Cricketscorepage(isLoggedIn: true,isAdmin : true),
                     ),
                   );
                 } else if (sports[index]['name'] == 'Volleyball') {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => VolleyballScorePage(isAdmin: true),
+                      builder: (context) => VolleyballScorePage(isLoggedIn: true,isAdmin: true),
                     ),
                   );
                 } else if (sports[index]['name'] == 'Football') {
@@ -101,7 +101,7 @@ class SportsPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TennisScorePage( isAdmin: true), // Navigate to TennisScorePage
+                      builder: (context) => Tennisscorepage(isLoggedIn: true, isAdmin: true), // Navigate to TennisScorePage
                     ),
                   );
                 } else {

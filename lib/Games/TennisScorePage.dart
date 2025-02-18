@@ -1,289 +1,378 @@
+import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class TennisScorePage extends StatefulWidget {
+class Tennisscorepage extends StatefulWidget {
+  final bool isLoggedIn;
   final bool isAdmin;
 
-  TennisScorePage({required this.isAdmin});
+  Tennisscorepage({required this.isLoggedIn, required this.isAdmin});
 
   @override
-  _TennisScorePageState createState() => _TennisScorePageState();
+  _TennisscorepageState createState() => _TennisscorepageState();
 }
 
-class _TennisScorePageState extends State<TennisScorePage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  List<Map<String, dynamic>> liveMatches = [];
-  List<Map<String, dynamic>> upcomingMatches = [];
-  List<Map<String, dynamic>> pastMatches = [];
+class _TennisscorepageState extends State< Tennisscorepage> {
+  int playerAGames = 0;
+  int playerBGames= 0;
+  int sets = 1;
+  int matchess = 1;
+  int playerAScore=0;
+  int playerBScore=0;
+  String playerAName = "Team A";
+  String playerBName = "Team B";
+  String matchId = "match1";
+  String matchStatus = "Status";
 
-  final TextEditingController playerAGamesController = TextEditingController();
-  final TextEditingController playerASetsController = TextEditingController();
-  final TextEditingController playerAMatchesController = TextEditingController();
+  int _selectedIndex = 0;
 
-  final TextEditingController playerBGamesController = TextEditingController();
-  final TextEditingController playerBSetsController = TextEditingController();
-  final TextEditingController playerBMatchesController = TextEditingController();
+  TextEditingController playerANameController = TextEditingController();
+  TextEditingController playerBNameController = TextEditingController();
+  TextEditingController playerAScoreController = TextEditingController();
+  TextEditingController playerBScoreController = TextEditingController();
+  TextEditingController setsController=TextEditingController();
+  TextEditingController matchessController=TextEditingController();
+  TextEditingController matchStatuses = TextEditingController();
+  TextEditingController winners = TextEditingController();
 
-  final String apiUrl = "https://api.example.com/matches"; // Your API URL
+  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/basketball";
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    fetchMatchData();
-  }
+  // Fetch match data from the API
+  Future<List<dynamic>> _fetchMatches(String status) async {
+    final String endpoint;
+    print(status);
+    if (status == 'live') {
+      endpoint = '$apiUrl/get-live';
+    }
+    else if (status == 'completed') {
+      endpoint = '$apiUrl/get-completed';
+    } else if (status == 'upcoming') {
+      endpoint = '$apiUrl/get-scheduled';
+    }  else {
+      throw Exception("Invalid match status: $status");
+    }
+    print(endpoint);
 
-  // Fetch match data from API
-  Future<void> fetchMatchData() async {
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        // Casting the dynamic list to List<Map<String, dynamic>>
-        List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(json.decode(response.body));
-        setState(() {
-          // Separate matches based on their status
-          liveMatches = data.where((match) => match['status'] == 'Live').toList();
-          upcomingMatches = data.where((match) => match['status'] == 'Upcoming').toList();
-          pastMatches = data.where((match) => match['status'] == 'Past').toList();
-        });
+    final response = await http.get(Uri.parse(endpoint));
+    print(response);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = json.decode(response.body);
+      print("sfdgsdf: $data,$status");
+      if (data is Map<String, dynamic> && data.containsKey('matches')) {
+        return data['matches'] as List<dynamic>;
       } else {
-        throw Exception('Failed to load matches');
+        throw Exception("Invalid data format: Expected a list under 'matches' key");
       }
-    } catch (e) {
-      print("Error: $e");
+    } else {
+      throw Exception('Failed to load matches');
     }
   }
 
-  // Update match data via API
-  Future<void> updateMatchData(String matchId, Map<String, dynamic> updatedData) async {
+  // Add a match using its details (admin only)
+  Future<void> _addMatch() async {
+    if (!widget.isAdmin) {
+      _showUnauthorizedMessage();
+      return;
+    }
+
+    final matchData = {
+      'playerAName': playerANameController.text,
+      'playerBName': playerBNameController.text,
+      'playerAScore': int.tryParse(playerAScoreController.text) ?? 0,
+      'playerBScore': int.tryParse(playerBScoreController.text) ?? 0,
+      'sets':setsController.text,
+      'matchess':matchessController.text,
+      'matchStatus': matchStatuses.text,
+      'winner': winners.text
+    };
+
     try {
-      final response = await http.put(
-        Uri.parse('$apiUrl/$matchId'), // Assuming you can update match by ID
+      final response = await http.post(
+        Uri.parse('$apiUrl/add-match'),
         headers: {"Content-Type": "application/json"},
-        body: json.encode(updatedData),
+        body: json.encode(matchData),
       );
 
-      if (response.statusCode == 200) {
-        fetchMatchData(); // Refresh the match data after updating
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Match Added Successfully')));
+        setState(() {});
       } else {
-        throw Exception('Failed to update match');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add match')));
       }
     } catch (e) {
-      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
-  // Delete match data via API
-  Future<void> deleteMatch(String matchId) async {
+  Future<void> _deleteMatch(String matchId) async {
+    if (!widget.isAdmin) {
+      _showUnauthorizedMessage();
+      return;
+    }
+
     try {
       final response = await http.delete(
-        Uri.parse('$apiUrl/$matchId'), // Assuming you can delete match by ID
+        Uri.parse('$apiUrl/delete-match/$matchId'),
       );
 
       if (response.statusCode == 200) {
-        fetchMatchData(); // Refresh the match data after deletion
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Match Deleted Successfully')));
+        setState(() {});
       } else {
-        throw Exception('Failed to delete match');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete match')));
       }
     } catch (e) {
-      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _tabController.dispose();
+  void _showUnauthorizedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('You must be an admin to perform this action!')));
+  }
+
+  // Update match details (admin only)
+  void _updateMatchDetails() {
+    if (widget.isAdmin) {
+      final matchData = {
+        'playerAName': playerANameController.text,
+        'playerBName': playerBNameController.text,
+        'playerAScore': playerAScoreController,
+        'playerBScore': playerBScoreController,
+        'sets':setsController,
+        'matchess':matchessController
+      };
+      http.put(Uri.parse('$apiUrl/$matchId'), body: json.encode(matchData));
+    } else {
+      _showUnauthorizedMessage();
+    }
+  }
+
+  void _showDialogToAddMatch() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add New Match'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: playerANameController,
+                decoration: InputDecoration(labelText: 'Team A Name'),
+              ),
+              TextField(
+                controller: playerBNameController,
+                decoration: InputDecoration(labelText: 'Team B Name'),
+              ),
+              TextField(
+                controller: playerAScoreController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team A Score'),
+              ),
+              TextField(
+                controller: playerBScoreController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Team B Score'),
+              ),
+              /*TextField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Period'),
+                onChanged: (value) => period = int.tryParse(value) ?? 1,
+              ),*/
+              TextField(
+                controller: matchessController,
+                decoration: InputDecoration(labelText: 'Matches'),
+              ),
+              TextField(
+                controller: setsController,
+                decoration: InputDecoration(labelText: 'Sets'),
+              ),
+
+              TextField(
+                controller: matchStatuses,
+                decoration: InputDecoration(labelText: 'Match Status(eg: live,scheduled,completed)'),
+              ),
+              TextField(
+                controller: winners,
+                decoration: InputDecoration(labelText: 'Winner'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _addMatch();
+                Navigator.of(context).pop();
+              },
+              child: Text('Add Match'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.pinkAccent,
-        title: Text('Tennis Score'),
-        centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'Live'),
-            Tab(text: 'Upcoming'),
-            Tab(text: 'Past'),
-          ],
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Table Tennis Scoreboard'),
+          backgroundColor: Colors.pinkAccent,
+          centerTitle: true,
+
+          bottom: TabBar(
+            onTap: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            tabs: [
+              Tab(text: 'PAST MATCHES'),
+              Tab(text: 'UPCOMING'),
+              Tab(text: 'LIVE'),
+            ],
+          ),
         ),
+        body: widget.isLoggedIn ? _getSelectedPage(_selectedIndex) : Center(
+          child: Text('You must log in to view this page!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
+        floatingActionButton: widget.isAdmin ? FloatingActionButton(
+          onPressed: _showDialogToAddMatch,
+          backgroundColor: Colors.green,
+          child: Icon(Icons.add),
+        ) : null,
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          buildMatchListTab(liveMatches),
-          buildMatchListTab(upcomingMatches),
-          buildMatchListTab(pastMatches),
-        ],
-      ),
-      floatingActionButton: widget.isAdmin
-          ? FloatingActionButton(
-        onPressed: () {
-          _showAdminDialog();
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue[700],
-      )
-          : null,
     );
   }
 
-  // Function to build match list for different match statuses
-  Widget buildMatchListTab(List<Map<String, dynamic>> matches) {
-    return ListView.builder(
-      itemCount: matches.length,
-      itemBuilder: (context, index) {
-        var match = matches[index];
-        return Card(
-          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-          color: Colors.blue[50],
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${match['playerA']} vs ${match['playerB']}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text('Status: ${match['status']}'),
-                Text('Player A Games: ${match['playerAGames']}'),
-                Text('Player B Games: ${match['playerBGames']}'),
-                if (widget.isAdmin)
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          _showUpdateDialog(match);
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          deleteMatch(match['id']);  // Delete by match ID
-                        },
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
+  Widget _getSelectedPage(int index) {
+    print(index);
+    switch (index) {
+      case 0: return _buildPastMatchesPage();
+      case 1: return _buildUpcomingMatchesPage();
+      case 2: return _buildLivePage();
+      default: return _buildLivePage();
+    }
+  }
+
+  Widget _buildLivePage() {
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchMatches('live'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return Center(child: Text('No matches found'));
+        }
+
+        return ListView.builder(
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            var match = snapshot.data![index];
+            return ListTile(
+              title: Text('${match['playerAName']} vs ${match['playerBName']}'),
+              subtitle: Text('Score: ${match['playerAScore']} - ${match['playerBScore']} and Sets:${match['sets']} , matches: ${match['matchess']}'),
+              trailing: widget.isAdmin
+                  ? IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  _deleteMatch(match['_id']);
+                },
+              )
+                  : null,
+            );
+          },
         );
       },
     );
   }
 
-  // Admin dialog to add/update match information
-  void _showAdminDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add Match Information'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: playerAGamesController,
-                  decoration: InputDecoration(labelText: 'Player A Games'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: playerASetsController,
-                  decoration: InputDecoration(labelText: 'Player A Sets'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: playerAMatchesController,
-                  decoration: InputDecoration(labelText: 'Player A Matches'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: playerBGamesController,
-                  decoration: InputDecoration(labelText: 'Player B Games'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: playerBSetsController,
-                  decoration: InputDecoration(labelText: 'Player B Sets'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: playerBMatchesController,
-                  decoration: InputDecoration(labelText: 'Player B Matches'),
-                  keyboardType: TextInputType.number,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Map<String, dynamic> newMatch = {
-                  'playerA': 'Player A', // Can take from user input
-                  'playerB': 'Player B',
-                  'status': 'Upcoming',
-                  'playerAGames': int.tryParse(playerAGamesController.text) ?? 0,
-                  'playerBGames': int.tryParse(playerBGamesController.text) ?? 0,
-                };
-                updateMatchData('new_id', newMatch); // Add match (simulate with a new ID)
-                Navigator.of(context).pop();
-              },
-              child: Text('Save Match Info'),
-            ),
-          ],
+
+  Widget _buildPastMatchesPage() {
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchMatches('completed'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return Center(child: Text('No completed matches'));
+        }
+
+        return ListView.builder(
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            var match = snapshot.data![index];
+            return ListTile(
+              title: Text('${match['playerAName']} vs ${match['playerBName']}'),
+             // subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
+              subtitle: Text('Score: ${match['playerAScore']} - ${match['playerBScore']} and Sets:${match['sets']} , matches: ${match['matchess']}'),
+              trailing: widget.isAdmin
+                  ? IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  _deleteMatch(match['_id']);
+                },
+              )
+                  : null,
+            );
+          },
         );
       },
     );
   }
 
-  // Function to show update dialog
-  void _showUpdateDialog(Map<String, dynamic> match) {
-    playerAGamesController.text = match['playerAGames'].toString();
-    playerBGamesController.text = match['playerBGames'].toString();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Update Match Info'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: playerAGamesController,
-                  decoration: InputDecoration(labelText: 'Player A Games'),
-                  keyboardType: TextInputType.number,
-                ),
-                TextField(
-                  controller: playerBGamesController,
-                  decoration: InputDecoration(labelText: 'Player B Games'),
-                  keyboardType: TextInputType.number,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Map<String, dynamic> updatedMatch = {
-                  'playerA': match['playerA'],
-                  'playerB': match['playerB'],
-                  'status': match['status'],
-                  'playerAGames': int.tryParse(playerAGamesController.text) ?? match['playerAGames'],
-                  'playerBGames': int.tryParse(playerBGamesController.text) ?? match['playerBGames'],
-                };
-                updateMatchData(match['id'], updatedMatch); // Update match by ID
-                Navigator.of(context).pop();
-              },
-              child: Text('Update'),
-            ),
-          ],
+  Widget _buildUpcomingMatchesPage() {
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchMatches('upcoming'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return Center(child: Text('No upcoming matches'));
+        }
+
+        return ListView.builder(
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            var match = snapshot.data![index];
+            return ListTile(
+              title: Text('${match['playerAName']} vs ${match['playerBName']}'),
+              subtitle: Text('Date: ${match['date']}'),
+              trailing: widget.isAdmin
+                  ? IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  _deleteMatch(match['_id']);
+                },
+              )
+                  : null,
+            );
+          },
         );
       },
     );

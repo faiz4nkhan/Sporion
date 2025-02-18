@@ -113,14 +113,16 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
         ),*/
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: [SizedBox(width: 50,),
             // LiveBuzz Logo (Placeholder Text)
-            Text(
-              'SPORION',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            Center(
+              child: Text(
+                'SPORION',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
@@ -156,20 +158,8 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                     Text("GEC Jhalawar's Premier Sports \nTournament",style: TextStyle(fontSize: 15,color: Colors.white),),
                     SizedBox(height: 20,),
                     Row(
-                      children: [  SizedBox(width: 60,),
-                        ElevatedButton(onPressed: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) =>LoginPage()),);
-
-                        },
-                            style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30), // Rounded corners
-                            ), padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Padding
-                              elevation: 10, // Shadow elevation
-                            ).copyWith(
-                              backgroundColor:  MaterialStateProperty.all(Colors.pinkAccent), // Ensures transparency for gradient
-                            ),
-                            child: Text("Register Now",style: TextStyle(color: Colors.white))) ,
-                        SizedBox(width: 20,),
+                      children: [
+                        SizedBox(width: 100,),
                         ElevatedButton(onPressed: (){}, style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30), // Rounded corners
                         ), padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Padding
@@ -238,7 +228,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       ),
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => CricketScorePage(isAdmin: false)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Cricketscorepage(isLoggedIn: true,isAdmin: false)),);
                     },
                   ),
                   SizedBox(height: 60,),
@@ -340,7 +330,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       ),
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => VolleyballScorePage(isAdmin: false)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => VolleyballScorePage(isLoggedIn: true,isAdmin: false)),);
                     },
                   ),
                   SizedBox(height: 60,),
@@ -376,7 +366,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
 
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => TennisScorePage(isAdmin: false)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Tennisscorepage(isLoggedIn: true, isAdmin: false)),);
                     },
                   ),
                 ],

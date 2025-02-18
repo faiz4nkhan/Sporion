@@ -2,24 +2,25 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-class BasketballPage extends StatefulWidget {
+class KhokhoPage extends StatefulWidget {
   final bool isLoggedIn;
   final bool isAdmin;
 
-  BasketballPage({required this.isLoggedIn, required this.isAdmin});
+  KhokhoPage({required this.isLoggedIn, required this.isAdmin});
 
   @override
-  _BasketballPageState createState() => _BasketballPageState();
+  _KhokhoPageState createState() => _KhokhoPageState();
 }
 
-class _BasketballPageState extends State<BasketballPage> {
+class _KhokhoPageState extends State< KhokhoPage> {
   int teamAScore = 0;
   int teamBScore = 0;
-  int period = 1;
+ // int period = 1;
   String teamAName = "Team A";
   String teamBName = "Team B";
   String matchId = "match1";
   String matchStatus = "Status";
+  String winnerss='Team A';
 
   int _selectedIndex = 0;
 
@@ -30,14 +31,14 @@ class _BasketballPageState extends State<BasketballPage> {
   TextEditingController matchStatuses = TextEditingController();
   TextEditingController winners = TextEditingController();
 
-  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/basketball";
+  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/kho-kho";
 
   // Fetch match data from the API
   Future<List<dynamic>> _fetchMatches(String status) async {
     final String endpoint;
-print(status);
+    print(status);
     if (status == 'live') {
-    endpoint = '$apiUrl/get-live';
+      endpoint = '$apiUrl/get-live';
     }
     else if (status == 'completed') {
       endpoint = '$apiUrl/get-completed';
@@ -49,10 +50,10 @@ print(status);
     print(endpoint);
 
     final response = await http.get(Uri.parse(endpoint));
-print(response);
+    print(response);
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = json.decode(response.body);
-print("sfdgsdf: $data,$status");
+      print("sfdgsdf: $data,$status");
       if (data is Map<String, dynamic> && data.containsKey('matches')) {
         return data['matches'] as List<dynamic>;
       } else {
@@ -75,7 +76,7 @@ print("sfdgsdf: $data,$status");
       'teamBName': teamBController.text,
       'teamAScore': int.tryParse(teamAScoreController.text) ?? 0,
       'teamBScore': int.tryParse(teamBScoreController.text) ?? 0,
-      'period': period,
+     // 'period': period,
       'matchStatus': matchStatuses.text,
       'winner': winners.text
     };
@@ -132,7 +133,7 @@ print("sfdgsdf: $data,$status");
         'teamBName': teamBController.text,
         'teamAScore': teamAScore,
         'teamBScore': teamBScore,
-        'period': period,
+        //'period': period,
       };
       http.put(Uri.parse('$apiUrl/$matchId'), body: json.encode(matchData));
     } else {
@@ -167,11 +168,11 @@ print("sfdgsdf: $data,$status");
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(labelText: 'Team B Score'),
               ),
-              TextField(
+             /* TextField(
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(labelText: 'Period'),
                 onChanged: (value) => period = int.tryParse(value) ?? 1,
-              ),
+              ),*/
               DropdownButtonFormField<String>(
                 value: matchStatuses.text.isNotEmpty ? matchStatuses.text : null,
                 decoration: InputDecoration(labelText: 'Match Status'),
@@ -215,7 +216,7 @@ print("sfdgsdf: $data,$status");
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Basketball Scoreboard'),
+          title: Text('Kho-Kho Scoreboard'),
           backgroundColor: Colors.pinkAccent,
           centerTitle: true,
 
@@ -278,11 +279,22 @@ print("sfdgsdf: $data,$status");
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
               trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _editMatch(match);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _deleteMatch(match['_id']);
+                    },
+                  ),
+                ],
               )
                   : null,
             );
@@ -290,6 +302,145 @@ print("sfdgsdf: $data,$status");
         );
       },
     );
+  }
+  void _editMatch(Map<String, dynamic> match) {
+    TextEditingController teamANameController = TextEditingController(text: match['teamAName']);
+    TextEditingController teamBNameController = TextEditingController(text: match['teamBName']);
+    TextEditingController teamAScoreController = TextEditingController(text: match['teamAScore'].toString());
+    TextEditingController teamBScoreController = TextEditingController(text: match['teamBScore'].toString());
+    String matchStatus = match['matchStatus'].toString();
+    TextEditingController winnersController = TextEditingController(text: match['winner'].toString());
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Edit Match'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: teamANameController,
+                    decoration: InputDecoration(labelText: 'Team A Name'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamBNameController,
+                    decoration: InputDecoration(labelText: 'Team B Name'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamAScoreController,
+                    decoration: InputDecoration(labelText: 'Team A Score'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamBScoreController,
+                    decoration: InputDecoration(labelText: 'Team B Score'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: matchStatus,
+                    decoration: InputDecoration(labelText: 'Match Status'),
+                    items: ['completed', 'live', 'scheduled']
+                        .map((status) => DropdownMenuItem(
+                      value: status,
+                      child: Text(status),
+                    ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        matchStatus = value ?? '';
+                      });
+                    },
+                  ),
+                  TextField(
+                    controller: winnersController,
+                    decoration: InputDecoration(labelText: 'Winner Team'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _updateMatch(
+                      match['_id'],
+                      teamANameController.text,
+                      teamBNameController.text,
+                      int.tryParse(teamAScoreController.text) ?? 0,
+                      int.tryParse(teamBScoreController.text) ?? 0,
+                      matchStatus,
+                      winnersController.text,
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+  Future<void> _updateMatch(
+      String matchId,
+      String teamAName,
+      String teamBName,
+      int teamAScore,
+      int teamBScore,
+      String matchStatus,
+      String winner,
+      ) async {
+    if (!widget.isAdmin) {
+      _showUnauthorizedMessage();
+      return;
+    }
+
+    final matchData = {
+      'teamAName': teamAName,
+      'teamBName': teamBName,
+      'teamAScore': teamAScore,
+      'teamBScore': teamBScore,
+      'matchStatus': matchStatus,
+      'winner': winner,
+    };
+
+    try {
+      final response = await http.put(
+        Uri.parse('$apiUrl/update-match/$matchId'),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(matchData),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Match Updated Successfully')),
+        );
+
+        // Update UI in real time
+        setState(() {
+          // Refresh or fetch updated data from API
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update match')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
 

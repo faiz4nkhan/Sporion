@@ -38,7 +38,7 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
   TextEditingController matchStatuses = TextEditingController();
   TextEditingController winners = TextEditingController();
 
-  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/basketball";
+  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/volleyball";
 
   // Fetch match data from the API
   Future<List<dynamic>> _fetchMatches(String status) async {
@@ -208,9 +208,18 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
                 decoration: InputDecoration(labelText: 'Period'),
                 onChanged: (value) => period = int.tryParse(value) ?? 1,
               ),*/
-              TextField(
-                controller: matchStatuses,
-                decoration: InputDecoration(labelText: 'Match Status(eg:live,scheduled and completed)'),
+              DropdownButtonFormField<String>(
+                value: matchStatuses.text.isNotEmpty ? matchStatuses.text : null,
+                decoration: InputDecoration(labelText: 'Match Status'),
+                items: ['completed', 'live', 'scheduled']
+                    .map((status) => DropdownMenuItem(
+                  value: status,
+                  child: Text(status),
+                ))
+                    .toList(),
+                onChanged: (value) {
+                  matchStatuses.text = value ?? '';
+                },
               ),
               TextField(
                 controller: winners,

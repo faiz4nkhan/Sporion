@@ -1,34 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:livebuzz/main.dart';
+
+import 'global.dart';
+// Import global variables
 
 class LoginPage extends StatelessWidget {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  void _login(BuildContext context) {
+    String username = usernameController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (username == 'admin' && password == 'admin') {
+      isAdmin = true;
+      isLoggedIn = true; // Mark user as logged in
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Admin Login Successful!')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LiveBuzzHomePage()),
+      );
+    } else if (username.isNotEmpty && password.isNotEmpty) {
+      isAdmin = false;
+      isLoggedIn = true; // Mark user as logged in
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User Login Successful!')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LiveBuzzHomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Invalid Credentials')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final TextEditingController usernameController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-
-    // Login handler function
-    void handleLogin() {
-      // Check for username and password
-      if (usernameController.text == "admin" && passwordController.text == "admin") {
-        // Navigate to the BasketballPage if credentials are correct
-       /* Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => UpdatePag(isLoggedIn: true,), // Pass isLoggedIn if needed
-          ),
-        );*/
-      } else {
-        // Show error message if credentials are wrong
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid password')),
-        );
-      }
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
+      appBar: AppBar(title: Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -47,7 +65,7 @@ class LoginPage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                handleLogin();  // Call the handleLogin method to validate credentials
+                _login(context);
               },
               child: Text('Login'),
             ),
@@ -57,4 +75,3 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
-

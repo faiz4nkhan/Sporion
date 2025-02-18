@@ -9,6 +9,9 @@ import 'package:livebuzz/ResultPage.dart';
 import 'package:livebuzz/Games/TennisScorePage.dart';
 import 'package:livebuzz/Games/VolleyballScorePage.dart';
 import 'package:livebuzz/sports.dart';
+
+import 'Games/noticeboard.dart';
+import 'global.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -113,7 +116,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
         ),*/
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [SizedBox(width: 50,),
+          children: [//SizedBox(width: 50,),
             // LiveBuzz Logo (Placeholder Text)
             Center(
               child: Text(
@@ -127,19 +130,23 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()),);
-            },
-            child: Text(
-              'Log In',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
+    actions: [
+    if (!isLoggedIn) // Only show if user is NOT logged in
+    TextButton(
+    onPressed: () {
+    Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+    },
+    child: Text(
+    'Log In',
+    style: TextStyle(color: Colors.white),
+    ),
+    ),
+    ],
       ),
-      body: SingleChildScrollView(
+    body: SingleChildScrollView(
         child: Column(
           children: [
             Container( width:double.infinity, // Or any other specific size
@@ -228,7 +235,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       ),
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Cricketscorepage(isLoggedIn: true,isAdmin: false)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Cricketscorepage(isLoggedIn: true,isAdmin: isAdmin)),);
                     },
                   ),
                   SizedBox(height: 60,),
@@ -262,7 +269,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       ),
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => BasketballPage(isLoggedIn: true,isAdmin: false )));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => BasketballPage(isLoggedIn: true,isAdmin: isAdmin )));
                     },
                   ),
                   SizedBox(height: 60,),
@@ -296,7 +303,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       ),
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => FootballScorePage(isAdmin: false)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => FootballScorePage(isAdmin: isAdmin)),);
                     },
                   ),
                   SizedBox(height: 60,),
@@ -330,7 +337,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       ),
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => VolleyballScorePage(isLoggedIn: true,isAdmin: false)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => VolleyballScorePage(isLoggedIn: true,isAdmin: isAdmin)),);
                     },
                   ),
                   SizedBox(height: 60,),
@@ -366,7 +373,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
 
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Tennisscorepage(isLoggedIn: true, isAdmin: false)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Tennisscorepage(isLoggedIn: true, isAdmin: isAdmin)),);
                     },
                   ),
                 ],
@@ -392,14 +399,20 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SportsPage()),);},),
             label: 'Sports',),
-          /*  BottomNavigationBarItem(
-            icon: Icon(Icons.point_of_sale_rounded),
+            BottomNavigationBarItem(
+            icon: InkWell(child: Icon(Icons.notifications),
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => NoticeBoardScreen(isLoggedIn: true,isAdmin:isAdmin)));
+
+            },
+            ),
+
             label: 'Tables',
-          ),*/
+          ),
           BottomNavigationBarItem(
             icon: InkWell(child: Icon(Icons.view_comfortable),
               onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ResultPage(isAdmin: false)),);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ResultPage(isLoggedIn: true,isAdmin: isAdmin)),);
 
               },
 
@@ -415,5 +428,4 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
     );
   }
 }
-
 

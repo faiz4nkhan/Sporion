@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:livebuzz/Games/BasketballPage.dart';
 import 'package:livebuzz/Games/CricketScorePage.dart';
 import 'package:livebuzz/Games/FootballScorePage.dart';
+import 'package:livebuzz/Games/Kabbadi.dart';
+import 'package:livebuzz/Games/noticeboard.dart';
 import 'package:livebuzz/ResultPage.dart';
 import 'package:livebuzz/Games/TennisScorePage.dart';
 import 'package:livebuzz/Games/VolleyballScorePage.dart';
+import 'package:livebuzz/global.dart';
 import 'package:livebuzz/main.dart';
+
+import 'Games/khokho.dart';
 
 class SportsPage extends StatelessWidget {
   int _selectedIndex = 0;
@@ -38,6 +43,14 @@ class SportsPage extends StatelessWidget {
       'name': 'Tennis',
       'image': 'assets/images/tt.jpg',
     },
+    {
+      'name':'Kho-Kho',
+      'image':'assets/images/kho-kho.jpeg'
+    },
+    {
+      'name':'Kabbadi',
+      'image':'assets/images/kabbadi.jpeg'
+    }
   ];
 
   @override
@@ -45,7 +58,7 @@ class SportsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Sports'),
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: Colors.white,
       ),
       body: ListView.builder(
         itemCount: sports.length,
@@ -73,35 +86,50 @@ class SportsPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BasketballPage(isLoggedIn: true, isAdmin: true),
+                      builder: (context) => BasketballPage(isLoggedIn: true, isAdmin: isAdmin),
                     ),
                   );
                 } else if (sports[index]['name'] == 'Cricket') {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Cricketscorepage(isLoggedIn: true,isAdmin : true),
+                      builder: (context) => Cricketscorepage(isLoggedIn: true,isAdmin : isAdmin),
                     ),
                   );
                 } else if (sports[index]['name'] == 'Volleyball') {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => VolleyballScorePage(isLoggedIn: true,isAdmin: true),
+                      builder: (context) => VolleyballScorePage(isLoggedIn: true,isAdmin: isAdmin),
                     ),
                   );
                 } else if (sports[index]['name'] == 'Football') {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FootballScorePage(isAdmin: false),
+                      builder: (context) => FootballScorePage(isAdmin: isAdmin),
                     ),
                   );
                 } else if (sports[index]['name'] == 'Tennis') {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Tennisscorepage(isLoggedIn: true, isAdmin: true), // Navigate to TennisScorePage
+                      builder: (context) => Tennisscorepage(isLoggedIn: true, isAdmin: isAdmin), // Navigate to TennisScorePage
+                    ),
+                  );
+                }
+                else if (sports[index]['name'] == 'Kho-Kho') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => KhokhoPage(isLoggedIn: true, isAdmin: isAdmin), // Navigate to TennisScorePage
+                    ),
+                  );
+                } if (sports[index]['name'] == 'Kabbadi') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Kabbadi(), // Navigate to TennisScorePage
                     ),
                   );
                 } else {
@@ -128,14 +156,18 @@ class SportsPage extends StatelessWidget {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SportsPage()),);},),
 
             label: 'Sports',),
-          /*  BottomNavigationBarItem(
-            icon: Icon(Icons.point_of_sale_rounded),
+           BottomNavigationBarItem(
+            icon: InkWell(child: Icon(Icons.notifications),
+              onTap: (){
+    Navigator.push(context, MaterialPageRoute(builder: (context) => NoticeBoardScreen(isLoggedIn: true,isAdmin: isAdmin)),);},),
+
+
             label: 'Tables',
-          ),*/
+          ),
           BottomNavigationBarItem(
             icon: InkWell(child: Icon(Icons.view_comfortable),
               onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ResultPage(isAdmin: true)),);},),
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ResultPage(isLoggedIn: true,isAdmin:isAdmin)),);},),
 
             label: 'Result',
           ),

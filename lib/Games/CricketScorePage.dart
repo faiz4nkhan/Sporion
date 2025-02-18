@@ -38,7 +38,7 @@ class _CricketPageState extends State<Cricketscorepage> {
   TextEditingController matchStatuses = TextEditingController();
   TextEditingController winners = TextEditingController();
 
-  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/basketball";
+  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/cricket";
 
   // Fetch match data from the API
   Future<List<dynamic>> _fetchMatches(String status) async {
@@ -209,10 +209,20 @@ class _CricketPageState extends State<Cricketscorepage> {
                 decoration: InputDecoration(labelText: 'Period'),
                 onChanged: (value) => period = int.tryParse(value) ?? 1,
               ),*/
-              TextField(
-                controller: matchStatuses,
+              DropdownButtonFormField<String>(
+                value: matchStatuses.text.isNotEmpty ? matchStatuses.text : null,
                 decoration: InputDecoration(labelText: 'Match Status'),
+                items: ['completed', 'live', 'scheduled']
+                    .map((status) => DropdownMenuItem(
+                  value: status,
+                  child: Text(status),
+                ))
+                    .toList(),
+                onChanged: (value) {
+                  matchStatuses.text = value ?? '';
+                },
               ),
+
               TextField(
                 controller: winners,
                 decoration: InputDecoration(labelText: 'Winner'),
@@ -305,7 +315,7 @@ class _CricketPageState extends State<Cricketscorepage> {
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
              // subtitle: Text('Score: ${match['teamARuns']} - ${match['teamBScore']}'),
-              subtitle: Text("Score: ${match.teamARuns}/${match.teamAWickets} (${match.teamAOvers} overs) vs ${match.teamBRuns}/${match.teamBWickets} (${match.teamBOvers} overs)"),
+              subtitle: Text("Score: ${match['teamARuns']}/Wickets: ${match['teamAWickets']} Over:${match['teamAOvers']}) vs ${match['teamBRuns']}/Wickets:${match['teamBWickets']} ,(Overs:${match['teamBOvers']} )"),
 
               trailing: widget.isAdmin
                   ? IconButton(
@@ -346,7 +356,7 @@ class _CricketPageState extends State<Cricketscorepage> {
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
              // subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
-              subtitle: Text("Score: ${match.teamARuns}/${match.teamAWickets} (${match.teamAOvers} overs) vs ${match.teamBRuns}/${match.teamBWickets} (${match.teamBOvers} overs)"),
+              subtitle: Text("Score: ${match['teamARuns']}/Wickets: ${match['teamAWickets']} Over:${match['teamAOvers']}) vs ${match['teamBRuns']}/Wickets:${match['teamBWickets']} ,(Overs:${match['teamBOvers']} )"),
               trailing: widget.isAdmin
                   ? IconButton(
                 icon: Icon(Icons.delete, color: Colors.red),

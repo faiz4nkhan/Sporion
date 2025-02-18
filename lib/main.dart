@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';// Ensure the correct import
 import 'package:livebuzz/Games/BasketballPage.dart';
 import 'package:livebuzz/Games/CricketScorePage.dart';
 import 'package:livebuzz/Games/FootballScorePage.dart';
+import 'package:livebuzz/Games/Kabbadi.dart';
+import 'package:livebuzz/Games/khokho.dart';
 import 'package:livebuzz/LoginPage.dart';
 import 'package:livebuzz/ResultPage.dart';
 import 'package:livebuzz/Games/TennisScorePage.dart';
@@ -108,7 +110,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: Colors.white,
         elevation: 0,
         /*  leading: IconButton(
           icon: Icon(Icons.menu, color: Colors.white),
@@ -124,7 +126,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -141,7 +143,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
     },
     child: Text(
     'Log In',
-    style: TextStyle(color: Colors.white),
+    style: TextStyle(color: Colors.black),
     ),
     ),
     ],
@@ -153,27 +155,27 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
               height: 400,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage("assets/images/football.jpg"), // Provide your image asset path here
+                  image: AssetImage("assets/images/logoSporian.png"), // Provide your image asset path here
                   fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
                 ),
               ),
               child: Center(
                 child: Column(
                   children: [SizedBox(height: 100,),
-                    Text("Sporion 2025",style: TextStyle(fontSize: 25,color: Colors.white),),
+                    //Text("Sporion 2025",style: TextStyle(fontSize: 25,color: Colors.white),),
                     SizedBox(height: 20,),
-                    Text("GEC Jhalawar's Premier Sports \nTournament",style: TextStyle(fontSize: 15,color: Colors.white),),
+                    //Text("GEC Jhalawar's Premier Sports \nTournament",style: TextStyle(fontSize: 15,color: Colors.white),),
                     SizedBox(height: 20,),
                     Row(
                       children: [
                         SizedBox(width: 100,),
-                        ElevatedButton(onPressed: (){}, style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
+                       /* ElevatedButton(onPressed: (){}, style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30), // Rounded corners
                         ), padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Padding
                           elevation: 10, // Shadow elevation
                         ).copyWith(
                           backgroundColor:  MaterialStateProperty.all(Colors.pinkAccent), // Ensures transparency for gradient
-                        ), child: Text("View Schedule",style: TextStyle(color: Colors.white),)) ,
+                        ), child: Text("View Schedule",style: TextStyle(color: Colors.white),)) ,*/
                       ],
                     ),
                   ],
@@ -277,7 +279,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                     child: Container(height: 250,width: 250,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage("assets/images/football.jpg"), // Provide your image asset path here
+                          image: AssetImage("assets/images/kho-kho.jpeg"), // Provide your image asset path here
                           fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
                         ),
 
@@ -296,14 +298,14 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                         children: [
                           Row(
                             children: [SizedBox(width: 20,height: 50,),
-                              Text("FOOTBALL",style: TextStyle(color: Colors.black,fontSize: 18),)
+                              Text("KHO-KHO",style: TextStyle(color: Colors.black,fontSize: 18),)
                             ],
                           ),
                         ],
                       ),
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => FootballScorePage(isAdmin: isAdmin)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => KhokhoPage(isLoggedIn: true, isAdmin: isAdmin)),);
                     },
                   ),
                   SizedBox(height: 60,),
@@ -345,7 +347,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                     child: Container(height: 250,width: 250,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage("assets/images/tt.jpg"), // Provide your image asset path here
+                          image: AssetImage("assets/images/kabbadi.jpeg"), // Provide your image asset path here
                           fit: BoxFit.cover, // You can adjust the fit (cover, contain, fill, etc.)
                         ),
 
@@ -364,7 +366,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                         children: [
                           Row(
                             children: [SizedBox(width: 20,height: 50,),
-                              Text("TENNIS",style: TextStyle(color: Colors.white,fontSize: 18),)
+                              Text("KABBADI",style: TextStyle(color: Colors.black,fontSize: 18),)
 
                             ],),
 
@@ -373,7 +375,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
 
                     ),
                     onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Tennisscorepage(isLoggedIn: true, isAdmin: isAdmin)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Kabbadi(isLoggedIn: true,isAdmin:isAdmin)),);
                     },
                   ),
                 ],
@@ -409,7 +411,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
 
             label: 'Tables',
           ),
-          BottomNavigationBarItem(
+         /* BottomNavigationBarItem(
             icon: InkWell(child: Icon(Icons.view_comfortable),
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ResultPage(isLoggedIn: true,isAdmin: isAdmin)),);
@@ -418,7 +420,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
 
             ),
             label: 'Result',
-          ),
+          ),*/
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,

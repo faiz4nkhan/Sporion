@@ -29,6 +29,7 @@ class _BasketballPageState extends State<BasketballPage> {
   TextEditingController teamBScoreController = TextEditingController();
   TextEditingController matchStatuses = TextEditingController();
   TextEditingController winners = TextEditingController();
+  TextEditingController periodController=TextEditingController();
 
   final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/basketball";
 
@@ -278,11 +279,22 @@ print("sfdgsdf: $data,$status");
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
               trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _editMatch(match);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _deleteMatch(match['_id']);
+                    },
+                  ),
+                ],
               )
                   : null,
             );
@@ -290,6 +302,159 @@ print("sfdgsdf: $data,$status");
         );
       },
     );
+  }
+
+  void _editMatch(Map<String, dynamic> match) {
+    TextEditingController teamANameController = TextEditingController(text: match['teamAName']);
+    TextEditingController teamBNameController = TextEditingController(text: match['teamBName']);
+    TextEditingController teamAScoreController = TextEditingController(text: match['teamAScore'].toString());
+    TextEditingController teamBScoreController = TextEditingController(text: match['teamBScore'].toString());
+    String matchStatus = match['matchStatus'].toString();
+    TextEditingController winnersController = TextEditingController(text: match['winner'].toString());
+    TextEditingController   periodController = TextEditingController(text: match['period'].toString());
+
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Edit Match'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: teamANameController,
+                    decoration: InputDecoration(labelText: 'Team A Name'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamBNameController,
+                    decoration: InputDecoration(labelText: 'Team B Name'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamAScoreController,
+                    decoration: InputDecoration(labelText: 'Team A Score'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamBScoreController,
+                    decoration: InputDecoration(labelText: 'Team B Score'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(labelText: 'Period'),
+                    onChanged: (value) => period = int.tryParse(value) ?? 1,
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: matchStatus,
+                    decoration: InputDecoration(labelText: 'Match Status'),
+                    items: ['completed', 'live', 'scheduled']
+                        .map((status) => DropdownMenuItem(
+                      value: status,
+                      child: Text(status),
+                    ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        matchStatus = value ?? '';
+                      });
+                    },
+                  ),
+                  TextField(
+                    controller: winnersController,
+                    decoration: InputDecoration(labelText: 'Winner Team'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _updateMatch(
+                      match['_id'],
+                      teamANameController.text,
+                      teamBNameController.text,
+                      int.tryParse(teamAScoreController.text) ?? 0,
+                      int.tryParse(teamBScoreController.text) ?? 0,
+                      matchStatus,
+                      winnersController.text,
+                      int.tryParse(periodController.text) ?? 0,
+
+
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+  Future<void> _updateMatch(
+      String matchId,
+      String teamAName,
+      String teamBName,
+      int teamAScore,
+      int teamBScore,
+      String matchStatus,
+      String winner,
+      int period
+
+  ) async {
+    if (!widget.isAdmin) {
+      _showUnauthorizedMessage();
+      return;
+    }
+
+    final matchData = {
+      'teamAName': teamAName,
+      'teamBName': teamBName,
+      'teamAScore': teamAScore,
+      'teamBScore': teamBScore,
+      'matchStatus': matchStatus,
+      'winner': winner,
+      'period':period
+    };
+
+    try {
+      final response = await http.put(
+        Uri.parse('$apiUrl/update-match/$matchId'),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(matchData),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Match Updated Successfully')),
+        );
+
+        // Update UI in real time
+        setState(() {
+          // Refresh or fetch updated data from API
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update match')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
 
@@ -317,11 +482,22 @@ print("sfdgsdf: $data,$status");
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
               trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _editMatch(match);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _deleteMatch(match['_id']);
+                    },
+                  ),
+                ],
               )
                   : null,
             );
@@ -355,11 +531,22 @@ print("sfdgsdf: $data,$status");
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Date: ${match['date']}'),
               trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _editMatch(match);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _deleteMatch(match['_id']);
+                    },
+                  ),
+                ],
               )
                   : null,
             );

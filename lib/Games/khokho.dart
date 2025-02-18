@@ -468,11 +468,22 @@ class _KhokhoPageState extends State< KhokhoPage> {
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
               trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _editMatch(match);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _deleteMatch(match['_id']);
+                    },
+                  ),
+                ],
               )
                   : null,
             );
@@ -506,13 +517,25 @@ class _KhokhoPageState extends State< KhokhoPage> {
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Date: ${match['date']}'),
               trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _editMatch(match);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _deleteMatch(match['_id']);
+                    },
+                  ),
+                ],
               )
                   : null,
+
             );
           },
         );

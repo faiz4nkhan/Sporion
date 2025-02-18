@@ -24,6 +24,7 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
   String teamBName = "Team B";
   String matchId = "match1";
   String matchStatus = "Status";
+  String winnerss="TeamA";
 
   int _selectedIndex = 0;
 
@@ -108,6 +109,7 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
+
 
   Future<void> _deleteMatch(String matchId) async {
     if (!widget.isAdmin) {
@@ -314,11 +316,22 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Points: ${match['teamAPoints']}/Sets: ${match['teamASets']} ,Games: ${match['teamBGames']}- ${match['teamBPoints']}/Sets: ${match['teamBSets']},Games: ${match['teamBGames']}'),
               trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _editMatch(match);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _deleteMatch(match['_id']);
+                    },
+                  ),
+                ],
               )
                   : null,
             );
@@ -326,6 +339,189 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
         );
       },
     );
+  }
+  void _editMatch(Map<String, dynamic> match) {
+    //TextEditingController teamANameController = TextEditingController(text: match['teamAName']);
+    //TextEditingController teamBNameController = TextEditingController(text: match['teamBName']);
+   // TextEditingController teamAScoreController = TextEditingController(text: match['teamAScore'].toString());
+    //TextEditingController teamBScoreController = TextEditingController(text: match['teamBScore'].toString());
+
+
+    TextEditingController teamANameController = TextEditingController(text: match['teamAName']);
+    TextEditingController teamBNameController = TextEditingController(text: match['teamBName']);
+    TextEditingController teamAPointsController = TextEditingController(text: match['teamASPoints'].toString());
+    TextEditingController teamBPointsController = TextEditingController(text: match['teamBPoints'].toString());
+    TextEditingController teamASetsController = TextEditingController(text: match['teamASets'].toString());
+    TextEditingController teamBSetsController = TextEditingController(text: match['teamBSets'].toString());
+    TextEditingController teamAGamesController = TextEditingController(text: match['teamAGames'].toString());
+    TextEditingController teamBGamesController = TextEditingController(text: match['teamBGames'].toString());
+    String matchStatus = match['matchStatus'].toString();
+    TextEditingController winnersController = TextEditingController(text: match['winner'].toString());
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Edit Match'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: teamANameController,
+                    decoration: InputDecoration(labelText: 'Team A Name'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamBNameController,
+                    decoration: InputDecoration(labelText: 'Team B Name'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamASetsController,
+                    decoration: InputDecoration(labelText: 'Team A Sets'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamBSetsController,
+                    decoration: InputDecoration(labelText: 'Team B Sets'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamAPointsController,
+                    decoration: InputDecoration(labelText: 'Team A Points'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),TextField(
+                    controller: teamBPointsController,
+                    decoration: InputDecoration(labelText: 'Team B Points'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: teamAGamesController,
+                    decoration: InputDecoration(labelText: 'Team A Games'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),TextField(
+                    controller: teamBGamesController,
+                    decoration: InputDecoration(labelText: 'Team B Games'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: matchStatus,
+                    decoration: InputDecoration(labelText: 'Match Status'),
+                    items: ['completed', 'live', 'scheduled']
+                        .map((status) => DropdownMenuItem(
+                      value: status,
+                      child: Text(status),
+                    ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        matchStatus = value ?? '';
+                      });
+                    },
+                  ),
+                  TextField(
+                    controller: winnersController,
+                    decoration: InputDecoration(labelText: 'Winner Team'),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _updateMatch(
+                      match['_id'],
+                      teamANameController.text,
+                      teamBNameController.text,
+                      int.tryParse(teamAPointsController.text) ?? 0,
+                      int.tryParse(teamBPointsController.text) ?? 0,
+                      int.tryParse(teamASetsController.text) ?? 0,
+                      int.tryParse(teamBSetsController.text) ?? 0,
+                      int.tryParse(teamAGamesController.text) ?? 0,
+                      int.tryParse(teamBGamesController.text) ?? 0,
+                      matchStatus,
+                      winnersController.text,
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+  Future<void> _updateMatch(
+      String matchId,
+      String teamAName,
+      String teamBName,
+  int teamASPoints,
+  int teamBPoints ,
+  int teamASets ,
+  int teamBSets,
+  int teamAGames,
+  int teamBGames ,
+      String matchStatus,
+      String winner,
+      ) async {
+    if (!widget.isAdmin) {
+      _showUnauthorizedMessage();
+      return;
+    }
+
+    final matchData = {
+      'teamAName': teamAName,
+      'teamBName': teamBName,
+     'teamASPoints':teamASPoints,
+     'teamBPoints':teamBPoints,
+    'teamASets':teamASets,
+    'teamBSets':teamBSets,
+    'teamAGames':teamAGames,
+    'teamBGames' : teamBGames,
+      'matchStatus': matchStatus,
+      'winner': winner,
+    };
+
+    try {
+      final response = await http.put(
+        Uri.parse('$apiUrl/update-match/$matchId'),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(matchData),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Match Updated Successfully')),
+        );
+
+        // Update UI in real time
+        setState(() {
+          // Refresh or fetch updated data from API
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update match')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
 
@@ -352,15 +548,25 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               //subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
-              subtitle: Text('Points: ${match['teamAPoints']}/Sets: ${match['teamASets']} ,Games: ${match['teamBGames']}- ${match['teamBPoints']}/Sets: ${match['teamBSets']},Games: ${match['teamBGames']}'),
-              trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
-              )
-                  : null,
+              subtitle: Text('Points: ${match['teamAPoints']}/Sets: ${match['teamASets']} ,Games: ${match['teamBGames']}- ${match['teamBPoints']}/Sets: ${match['teamBSets']},Games: ${match['teamBGames']}'),trailing: widget.isAdmin
+                ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () {
+                    _editMatch(match);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    _deleteMatch(match['_id']);
+                  },
+                ),
+              ],
+            )
+                : null,
             );
           },
         );
@@ -392,11 +598,22 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
               subtitle: Text('Date: ${match['date']}'),
               trailing: widget.isAdmin
-                  ? IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  _deleteMatch(match['_id']);
-                },
+                  ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      _editMatch(match);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      _deleteMatch(match['_id']);
+                    },
+                  ),
+                ],
               )
                   : null,
             );

@@ -35,14 +35,8 @@ class SportsPage extends StatelessWidget {
       'name': 'Volleyball',
       'image': 'assets/images/vollyball.jpg',
     },
-    {
-      'name': 'Football',
-      'image': 'assets/images/football.jpg',
-    },
-    {
-      'name': 'Tennis',
-      'image': 'assets/images/tt.jpg',
-    },
+
+
     {
       'name':'Kho-Kho',
       'image':'assets/images/kho-kho.jpeg'
@@ -103,22 +97,7 @@ class SportsPage extends StatelessWidget {
                       builder: (context) => VolleyballScorePage(isLoggedIn: true,isAdmin: isAdmin),
                     ),
                   );
-                } else if (sports[index]['name'] == 'Football') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FootballScorePage(isAdmin: isAdmin),
-                    ),
-                  );
-                } else if (sports[index]['name'] == 'Tennis') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Tennisscorepage(isLoggedIn: true, isAdmin: isAdmin), // Navigate to TennisScorePage
-                    ),
-                  );
-                }
-                else if (sports[index]['name'] == 'Kho-Kho') {
+                } else if (sports[index]['name'] == 'Kho-Kho') {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -129,7 +108,7 @@ class SportsPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Kabbadi(), // Navigate to TennisScorePage
+                      builder: (context) => Kabbadi(isLoggedIn: true,isAdmin: isAdmin,), // Navigate to TennisScorePage
                     ),
                   );
                 } else {
@@ -164,13 +143,13 @@ class SportsPage extends StatelessWidget {
 
             label: 'Tables',
           ),
-          BottomNavigationBarItem(
+       /*   BottomNavigationBarItem(
             icon: InkWell(child: Icon(Icons.view_comfortable),
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ResultPage(isLoggedIn: true,isAdmin:isAdmin)),);},),
 
             label: 'Result',
-          ),
+          ),*/
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,

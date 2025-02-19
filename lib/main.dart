@@ -3,12 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';// Ensure the correct import
 import 'package:livebuzz/Games/BasketballPage.dart';
 import 'package:livebuzz/Games/CricketScorePage.dart';
-import 'package:livebuzz/Games/FootballScorePage.dart';
 import 'package:livebuzz/Games/Kabbadi.dart';
 import 'package:livebuzz/Games/khokho.dart';
 import 'package:livebuzz/LoginPage.dart';
-import 'package:livebuzz/ResultPage.dart';
-import 'package:livebuzz/Games/TennisScorePage.dart';
 import 'package:livebuzz/Games/VolleyballScorePage.dart';
 import 'package:livebuzz/sports.dart';
 
@@ -66,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen> {
             SizedBox(height: 20),
             // App name
             Text(
-              'SPORION',
+              "SPORION'25",
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
@@ -397,7 +394,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: InkWell(child: Icon(Icons.sports_volleyball_rounded),
+            icon: InkWell(child: Icon(Icons.sports_baseball_rounded),
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SportsPage()),);},),
             label: 'Sports',),
@@ -424,7 +421,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,
-      ),
+      ),git
 
 
     );

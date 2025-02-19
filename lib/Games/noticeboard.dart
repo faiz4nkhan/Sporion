@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
+import '../global.dart';
+
 class NoticeBoardScreen extends StatefulWidget {
   final bool isLoggedIn;
   final bool isAdmin;
@@ -15,7 +17,7 @@ class NoticeBoardScreen extends StatefulWidget {
 
 class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
   List<Map<String, dynamic>> notices = [];
-  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/notice";
+  final String apiUrl = "$api/notice";
 
   TextEditingController titleController = TextEditingController();
   TextEditingController bodyController = TextEditingController();
@@ -234,22 +236,36 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
                             notice['title'] ?? "No Title",
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                          Text(
-                            notice['body'] ?? "",
-                            style: TextStyle(fontSize: 16),
+                          SingleChildScrollView(scrollDirection: Axis.horizontal,
+                            child: Container(width: 300,
+                              child: Text(
+                                notice['body'] ?? "",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
                           ),
                         ],
                       ),
+                      /*Text(
+                        "${formatDate(notice['createdAt'] ?? "")}",
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),*/
+                    ],
+                  ),
+
+                  Divider(),
+                  Row(
+                    children: [
+                      Text(
+                        "Status: ${notice['status'] ?? ""}",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      SizedBox(width: 130),
                       Text(
                         "${formatDate(notice['createdAt'] ?? "")}",
                         style: TextStyle(fontSize: 12, color: Colors.black),
                       ),
                     ],
-                  ),
-                  Divider(),
-                  Text(
-                    "Status: ${notice['status'] ?? ""}",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   // Show Edit button for Admin only
                   if (widget.isAdmin)
@@ -277,6 +293,10 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
         child: Icon(Icons.add),
       )
           : null,
+
+
+
+
     );
   }
 }

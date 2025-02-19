@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../global.dart';
+
 class Cricketscorepage extends StatefulWidget {
   final bool isLoggedIn;
   final bool isAdmin;
@@ -26,6 +28,8 @@ class _CricketPageState extends State<Cricketscorepage> {
   String matchStatus = "Status";
 
   int _selectedIndex = 0;
+  List<Map<String, dynamic>> matches = [];
+
 
   TextEditingController teamAController = TextEditingController();
   TextEditingController teamBController = TextEditingController();
@@ -38,7 +42,7 @@ class _CricketPageState extends State<Cricketscorepage> {
   TextEditingController matchStatuses = TextEditingController();
   TextEditingController winners = TextEditingController();
 
-  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/cricket";
+  final String apiUrl = "$api/cricket";
 
   // Fetch match data from the API
   Future<List<dynamic>> _fetchMatches(String status) async {
@@ -161,73 +165,75 @@ class _CricketPageState extends State<Cricketscorepage> {
       builder: (context) {
         return AlertDialog(
           title: Text('Add New Match'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: teamAController,
-                decoration: InputDecoration(labelText: 'Team A Name'),
-              ),
-              TextField(
-                controller: teamBController,
-                decoration: InputDecoration(labelText: 'Team B Name'),
-              ),
-              TextField(
-                controller: teamARunsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team A Runs'),
-              ),
-              TextField(
-                controller: teamBRunsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team B Runs'),
-              ),
-
-              TextField(
-                controller: teamAWicketsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team A Wickets'),
-              ),
-              TextField(
-                controller: teamBWicketsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team B Wickets'),
-              ),
-              TextField(
-                controller: teamAOversController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team A Overs'),
-              ),
-              TextField(
-                controller: teamBOversController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team B Overs'),
-              ),
-
-              /*TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Period'),
-                onChanged: (value) => period = int.tryParse(value) ?? 1,
-              ),*/
-              DropdownButtonFormField<String>(
-                value: matchStatuses.text.isNotEmpty ? matchStatuses.text : null,
-                decoration: InputDecoration(labelText: 'Match Status'),
-                items: ['completed', 'live', 'scheduled']
-                    .map((status) => DropdownMenuItem(
-                  value: status,
-                  child: Text(status),
-                ))
-                    .toList(),
-                onChanged: (value) {
-                  matchStatuses.text = value ?? '';
-                },
-              ),
-
-              TextField(
-                controller: winners,
-                decoration: InputDecoration(labelText: 'Winner'),
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: teamAController,
+                  decoration: InputDecoration(labelText: 'Team A Name'),
+                ),
+                TextField(
+                  controller: teamBController,
+                  decoration: InputDecoration(labelText: 'Team B Name'),
+                ),
+                TextField(
+                  controller: teamARunsController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Team A Runs'),
+                ),
+                TextField(
+                  controller: teamBRunsController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Team B Runs'),
+                ),
+            
+                TextField(
+                  controller: teamAWicketsController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Team A Wickets'),
+                ),
+                TextField(
+                  controller: teamBWicketsController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Team B Wickets'),
+                ),
+                TextField(
+                  controller: teamAOversController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Team A Overs'),
+                ),
+                TextField(
+                  controller: teamBOversController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Team B Overs'),
+                ),
+            
+                /*TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Period'),
+                  onChanged: (value) => period = int.tryParse(value) ?? 1,
+                ),*/
+                DropdownButtonFormField<String>(
+                  value: matchStatuses.text.isNotEmpty ? matchStatuses.text : null,
+                  decoration: InputDecoration(labelText: 'Match Status'),
+                  items: ['completed', 'live', 'scheduled']
+                      .map((status) => DropdownMenuItem(
+                    value: status,
+                    child: Text(status),
+                  ))
+                      .toList(),
+                  onChanged: (value) {
+                    matchStatuses.text = value ?? '';
+                  },
+                ),
+            
+                TextField(
+                  controller: winners,
+                  decoration: InputDecoration(labelText: 'Winner'),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -253,8 +259,8 @@ class _CricketPageState extends State<Cricketscorepage> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Cricket Scoreboard'),
-          backgroundColor: Colors.pinkAccent,
+          title: Text('Cricket '),
+          backgroundColor: Colors.white,
           centerTitle: true,
 
           bottom: TabBar(
@@ -315,7 +321,7 @@ class _CricketPageState extends State<Cricketscorepage> {
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
              // subtitle: Text('Score: ${match['teamARuns']} - ${match['teamBScore']}'),
-              subtitle: Text("Score: ${match['teamARuns']}/Wickets: ${match['teamAWickets']} Over:${match['teamAOvers']}) vs ${match['teamBRuns']}/Wickets:${match['teamBWickets']} ,(Overs:${match['teamBOvers']} )"),
+              subtitle: Text("Score: ${match['teamARuns']}/${match['teamAWickets']} (${match['teamAOvers']}) vs ${match['teamBRuns']}/${match['teamBWickets']} (${match['teamBOvers']})"),
 
               trailing: widget.isAdmin
                   ? Row(
@@ -358,7 +364,9 @@ class _CricketPageState extends State<Cricketscorepage> {
     TextEditingController teamAWicketsController = TextEditingController(text: match['teamAWickets'].toString());
     TextEditingController teamBWicketsController = TextEditingController(text: match['teamBWickets'].toString());
     TextEditingController winnersController = TextEditingController(text: match['winners'].toString());
-    TextEditingController matchStatuses = TextEditingController();
+   // TextEditingController matchStatuses = TextEditingController();
+    String matchStatus = match['matchStatus'].toString();
+
 
     showDialog(
       context: context,
@@ -367,76 +375,78 @@ class _CricketPageState extends State<Cricketscorepage> {
           builder: (context, setState) {
             return AlertDialog(
               title: Text('Edit Match'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: teamAController,
-                    decoration: InputDecoration(labelText: 'Team A Name'),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamBController,
-                    decoration: InputDecoration(labelText: 'Team B Name'),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamARunsController,
-                    decoration: InputDecoration(labelText: 'Team A Runs'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamBRunsController,
-                    decoration: InputDecoration(labelText: 'Team B Runs'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamAOversController,
-                    decoration: InputDecoration(labelText: 'Team A Over'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamBOversController,
-                    decoration: InputDecoration(labelText: 'Team B Over'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamAWicketsController,
-                    decoration: InputDecoration(labelText: 'Team A Wickets'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamBWicketsController,
-                    decoration: InputDecoration(labelText: 'Team B Wickets'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  DropdownButtonFormField<String>(
-                    value: matchStatus,
-                    decoration: InputDecoration(labelText: 'Match Status'),
-                    items: ['completed', 'live', 'scheduled']
-                        .map((status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(status),
-                    )).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        matchStatus = value ?? '';
-                      });
-                    },
-                  ),
-
-              TextField(
-                    controller: winnersController,
-                    decoration: InputDecoration(labelText: 'Winner Team'),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                ],
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: teamAController,
+                      decoration: InputDecoration(labelText: 'Team A Name'),
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamBController,
+                      decoration: InputDecoration(labelText: 'Team B Name'),
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamARunsController,
+                      decoration: InputDecoration(labelText: 'Team A Runs'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamBRunsController,
+                      decoration: InputDecoration(labelText: 'Team B Runs'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamAOversController,
+                      decoration: InputDecoration(labelText: 'Team A Over'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamBOversController,
+                      decoration: InputDecoration(labelText: 'Team B Over'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamAWicketsController,
+                      decoration: InputDecoration(labelText: 'Team A Wickets'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamBWicketsController,
+                      decoration: InputDecoration(labelText: 'Team B Wickets'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    DropdownButtonFormField<String>(
+                      value: matchStatus,
+                      decoration: InputDecoration(labelText: 'Match Status'),
+                      items: ['completed', 'live', 'scheduled']
+                          .map((status) => DropdownMenuItem(
+                        value: status,
+                        child: Text(status),
+                      )).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          matchStatus = value ?? '';
+                        });
+                      },
+                    ),
+                
+                TextField(
+                      controller: winnersController,
+                      decoration: InputDecoration(labelText: 'Winner Team'),
+                      onChanged: (value) => setState(() {}),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -480,7 +490,7 @@ class _CricketPageState extends State<Cricketscorepage> {
   int teamAWickets ,
   int teamBWickets,
       String matchStatus,
-      String winner,
+      String winners,
       ) async {
     if (!widget.isAdmin) {
       _showUnauthorizedMessage();
@@ -488,18 +498,19 @@ class _CricketPageState extends State<Cricketscorepage> {
     }
 
     final matchData = {
-      'teamAName': teamAName,
+     // 'matchId':matchId,
+    'teamAName': teamAName,
       'teamBName': teamBName,
       'teamARuns': teamARuns,
       'teamBRuns': teamBRuns,
-      'teamAOver': teamAOvers,
-      'teamBOver': teamBOvers,
+      'teamAOvers': teamAOvers,
+      'teamBOvers': teamBOvers,
       'teamAWickets': teamAWickets,
       'teamBWickets': teamBWickets,
       'matchStatus': matchStatus,
-      'winner': winner,
+      'winner': winners,
     };
-
+print("zzz $matchData");
     try {
       final response = await http.put(
         Uri.parse('$apiUrl/update-match/$matchId'),
@@ -515,6 +526,24 @@ class _CricketPageState extends State<Cricketscorepage> {
         // Update UI in real time
         setState(() {
           // Refresh or fetch updated data from API
+          int matchIndex = matches.indexWhere((match) => match['_id'] == matchId);
+          if (matchIndex != -1) {
+            matches[matchIndex] = {
+              '_id': matchId,
+              'teamAName': teamAName,
+              'teamBName': teamBName,
+              'teamARuns': teamARuns,
+              'teamBRuns': teamBRuns,
+              'teamAOvers': teamAOvers,
+              'teamBOvers': teamBOvers,
+              'teamAWickets': teamAWickets,
+              'teamBWickets': teamBWickets,
+              'matchStatus': matchStatus,
+              'winners': winners,
+            };
+          }
+
+
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -552,7 +581,7 @@ class _CricketPageState extends State<Cricketscorepage> {
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
              // subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
-              subtitle: Text("Score: ${match['teamARuns']}/Wickets: ${match['teamAWickets']} Over:${match['teamAOvers']}) vs ${match['teamBRuns']}/Wickets:${match['teamBWickets']} ,(Overs:${match['teamBOvers']} )"),
+              subtitle: Text("Score: ${match['teamARuns']}/${match['teamAWickets']} (${match['teamAOvers']}) vs ${match['teamBRuns']}/${match['teamBWickets']} (${match['teamBOvers']})"),
               trailing: widget.isAdmin
                   ? Row(
                 mainAxisSize: MainAxisSize.min,
@@ -601,7 +630,7 @@ class _CricketPageState extends State<Cricketscorepage> {
             var match = snapshot.data![index];
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
-              subtitle: Text('Date: ${match['date']}'),
+              subtitle: Text("Score: ${match['teamARuns']}/${match['teamAWickets']} (${match['teamAOvers']}) vs ${match['teamBRuns']}/${match['teamBWickets']} (${match['teamBOvers']})"),
               trailing: widget.isAdmin
                   ? Row(
                 mainAxisSize: MainAxisSize.min,

@@ -2,6 +2,8 @@ import 'dart:core';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+import '../global.dart';
 class Kabbadi extends StatefulWidget {
   final bool isLoggedIn;
   final bool isAdmin;
@@ -31,7 +33,7 @@ class _KabbadiState extends State<Kabbadi> {
   TextEditingController matchStatuses = TextEditingController();
   TextEditingController winners = TextEditingController();
 
-  final String apiUrl = "https://bec3-117-235-167-111.ngrok-free.app/api/kho-kho";
+  final String apiUrl = "$api/kabaddi";
 
   // Fetch match data from the API
   Future<List<dynamic>> _fetchMatches(String status) async {
@@ -147,50 +149,52 @@ class _KabbadiState extends State<Kabbadi> {
       builder: (context) {
         return AlertDialog(
           title: Text('Add New Match'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: teamAController,
-                decoration: InputDecoration(labelText: 'Team A Name'),
-              ),
-              TextField(
-                controller: teamBController,
-                decoration: InputDecoration(labelText: 'Team B Name'),
-              ),
-              TextField(
-                controller: teamAScoreController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team A Score'),
-              ),
-              TextField(
-                controller: teamBScoreController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Team B Score'),
-              ),
-              /* TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Period'),
-                onChanged: (value) => period = int.tryParse(value) ?? 1,
-              ),*/
-              DropdownButtonFormField<String>(
-                value: matchStatuses.text.isNotEmpty ? matchStatuses.text : null,
-                decoration: InputDecoration(labelText: 'Match Status'),
-                items: ['completed', 'live', 'scheduled']
-                    .map((status) => DropdownMenuItem(
-                  value: status,
-                  child: Text(status),
-                ))
-                    .toList(),
-                onChanged: (value) {
-                  matchStatuses.text = value ?? '';
-                },
-              ),
-              TextField(
-                controller: winners,
-                decoration: InputDecoration(labelText: 'Winner'),
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: teamAController,
+                  decoration: InputDecoration(labelText: 'Team A Name'),
+                ),
+                TextField(
+                  controller: teamBController,
+                  decoration: InputDecoration(labelText: 'Team B Name'),
+                ),
+                TextField(
+                  controller: teamAScoreController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Team A Score'),
+                ),
+                TextField(
+                  controller: teamBScoreController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Team B Score'),
+                ),
+                /* TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(labelText: 'Period'),
+                  onChanged: (value) => period = int.tryParse(value) ?? 1,
+                ),*/
+                DropdownButtonFormField<String>(
+                  value: matchStatuses.text.isNotEmpty ? matchStatuses.text : null,
+                  decoration: InputDecoration(labelText: 'Match Status'),
+                  items: ['completed', 'live', 'scheduled']
+                      .map((status) => DropdownMenuItem(
+                    value: status,
+                    child: Text(status),
+                  ))
+                      .toList(),
+                  onChanged: (value) {
+                    matchStatuses.text = value ?? '';
+                  },
+                ),
+                TextField(
+                  controller: winners,
+                  decoration: InputDecoration(labelText: 'Winner'),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -216,8 +220,8 @@ class _KabbadiState extends State<Kabbadi> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Kabbadi Scoreboard'),
-          backgroundColor: Colors.pinkAccent,
+          title: Text('Kabbadi '),
+          backgroundColor: Colors.white,
           centerTitle: true,
 
           bottom: TabBar(
@@ -318,52 +322,54 @@ class _KabbadiState extends State<Kabbadi> {
           builder: (context, setState) {
             return AlertDialog(
               title: Text('Edit Match'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: teamANameController,
-                    decoration: InputDecoration(labelText: 'Team A Name'),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamBNameController,
-                    decoration: InputDecoration(labelText: 'Team B Name'),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamAScoreController,
-                    decoration: InputDecoration(labelText: 'Team A Score'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  TextField(
-                    controller: teamBScoreController,
-                    decoration: InputDecoration(labelText: 'Team B Score'),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                  ),
-                  DropdownButtonFormField<String>(
-                    value: matchStatus,
-                    decoration: InputDecoration(labelText: 'Match Status'),
-                    items: ['completed', 'live', 'scheduled']
-                        .map((status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(status),
-                    ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        matchStatus = value ?? '';
-                      });
-                    },
-                  ),
-                  TextField(
-                    controller: winnersController,
-                    decoration: InputDecoration(labelText: 'Winner Team'),
-                    onChanged: (value) => setState(() {}),
-                  ),
-                ],
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: teamANameController,
+                      decoration: InputDecoration(labelText: 'Team A Name'),
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamBNameController,
+                      decoration: InputDecoration(labelText: 'Team B Name'),
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamAScoreController,
+                      decoration: InputDecoration(labelText: 'Team A Score'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    TextField(
+                      controller: teamBScoreController,
+                      decoration: InputDecoration(labelText: 'Team B Score'),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) => setState(() {}),
+                    ),
+                    DropdownButtonFormField<String>(
+                      value: matchStatus,
+                      decoration: InputDecoration(labelText: 'Match Status'),
+                      items: ['completed', 'live', 'scheduled']
+                          .map((status) => DropdownMenuItem(
+                        value: status,
+                        child: Text(status),
+                      ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          matchStatus = value ?? '';
+                        });
+                      },
+                    ),
+                    TextField(
+                      controller: winnersController,
+                      decoration: InputDecoration(labelText: 'Winner Team'),
+                      onChanged: (value) => setState(() {}),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -515,7 +521,7 @@ class _KabbadiState extends State<Kabbadi> {
             var match = snapshot.data![index];
             return ListTile(
               title: Text('${match['teamAName']} vs ${match['teamBName']}'),
-              subtitle: Text('Date: ${match['date']}'),
+              subtitle: Text('Score: ${match['teamAScore']} - ${match['teamBScore']}'),
               trailing: widget.isAdmin
                   ? Row(
                 mainAxisSize: MainAxisSize.min,

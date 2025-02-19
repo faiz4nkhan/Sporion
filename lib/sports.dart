@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:livebuzz/Games/BasketballPage.dart';
 import 'package:livebuzz/Games/CricketScorePage.dart';
-import 'package:livebuzz/Games/FootballScorePage.dart';
 import 'package:livebuzz/Games/Kabbadi.dart';
 import 'package:livebuzz/Games/noticeboard.dart';
-import 'package:livebuzz/ResultPage.dart';
-import 'package:livebuzz/Games/TennisScorePage.dart';
 import 'package:livebuzz/Games/VolleyballScorePage.dart';
 import 'package:livebuzz/global.dart';
 import 'package:livebuzz/main.dart';
@@ -130,7 +127,7 @@ class SportsPage extends StatelessWidget {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: InkWell(child: Icon(Icons.sports_volleyball_rounded),
+            icon: InkWell(child: Icon(Icons.sports_baseball_rounded),
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SportsPage()),);},),
 

@@ -208,7 +208,12 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Notice Board')),
+      appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.notifications, color: Colors.black),
+            onPressed: () {},
+          ),
+          title: Text('Notice')),
       body: notices.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(

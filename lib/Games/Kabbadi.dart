@@ -220,10 +220,12 @@ class _KabbadiState extends State<Kabbadi> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.sports_kabaddi, color: Colors.black),
+            onPressed: () {},
+          ),
           title: Text('Kabbadi '),
           backgroundColor: Colors.white,
-          centerTitle: true,
-
           bottom: TabBar(
             onTap: (int index) {
               setState(() {

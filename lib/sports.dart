@@ -49,6 +49,10 @@ class SportsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Sports'),
+        leading: IconButton(
+          icon: Icon(Icons.sports_kabaddi, color: Colors.black),
+          onPressed: () {},
+        ),
         backgroundColor: Colors.white,
       ),
       body: ListView.builder(
@@ -138,15 +142,9 @@ class SportsPage extends StatelessWidget {
     Navigator.push(context, MaterialPageRoute(builder: (context) => NoticeBoardScreen(isLoggedIn: true,isAdmin: isAdmin)),);},),
 
 
-            label: 'Tables',
+            label: 'Notice',
           ),
-       /*   BottomNavigationBarItem(
-            icon: InkWell(child: Icon(Icons.view_comfortable),
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ResultPage(isLoggedIn: true,isAdmin:isAdmin)),);},),
 
-            label: 'Result',
-          ),*/
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,

@@ -220,9 +220,12 @@ print("sfdgsdf: $data,$status");
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.sports_basketball_sharp, color: Colors.black),
+            onPressed: () {},
+          ),
           title: Text('Basketball'),
           backgroundColor: Colors.white,
-          centerTitle: true,
 
           bottom: TabBar(
             onTap: (int index) {

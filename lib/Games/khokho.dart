@@ -220,6 +220,10 @@ class _KhokhoPageState extends State< KhokhoPage> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.sports_kabaddi_rounded, color: Colors.black),
+            onPressed: () {},
+          ),
           title: Text('Kho-Kho '),
           backgroundColor: Colors.white,
           centerTitle: true,

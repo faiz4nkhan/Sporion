@@ -1,5 +1,4 @@
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';// Ensure the correct import
 import 'package:livebuzz/Games/BasketballPage.dart';
 import 'package:livebuzz/Games/CricketScorePage.dart';
@@ -15,7 +14,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp();
 
   runApp(LiveBuzzApp());
 }
@@ -52,14 +50,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pinkAccent, // Background color for splash screen.
+      backgroundColor: Colors.deepPurple, // Background color for splash screen.
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // App logo or placeholder icon
             Image.asset("assets/images/ball.png",color: Colors.white,),
-//Image(image: AssetImage("assets/images/ball.png",)),
             SizedBox(height: 20),
             // App name
             Text(
@@ -108,23 +105,21 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
-        /*  leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.white),
+       // elevation: 0,
+         leading: IconButton(
+          icon: Icon(Icons.sports_kabaddi, color: Colors.black),
           onPressed: () {},
-        ),*/
+        ),
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [//SizedBox(width: 50,),
             // LiveBuzz Logo (Placeholder Text)
-            Center(
-              child: Text(
-                'SPORION',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+            Text(
+              'SPORION',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
           ],
@@ -138,9 +133,15 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
     MaterialPageRoute(builder: (context) => LoginPage()),
     );
     },
-    child: Text(
-    'Log In',
-    style: TextStyle(color: Colors.black),
+    child: Row(
+      children: [
+Icon(Icons.login),
+        SizedBox(width: 10,),
+        Text(
+        'Log In',
+        style: TextStyle(color: Colors.black),
+        ),
+      ],
     ),
     ),
     ],
@@ -159,22 +160,8 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
               child: Center(
                 child: Column(
                   children: [SizedBox(height: 100,),
-                    //Text("Sporion 2025",style: TextStyle(fontSize: 25,color: Colors.white),),
                     SizedBox(height: 20,),
-                    //Text("GEC Jhalawar's Premier Sports \nTournament",style: TextStyle(fontSize: 15,color: Colors.white),),
                     SizedBox(height: 20,),
-                    Row(
-                      children: [
-                        SizedBox(width: 100,),
-                       /* ElevatedButton(onPressed: (){}, style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30), // Rounded corners
-                        ), padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Padding
-                          elevation: 10, // Shadow elevation
-                        ).copyWith(
-                          backgroundColor:  MaterialStateProperty.all(Colors.pinkAccent), // Ensures transparency for gradient
-                        ), child: Text("View Schedule",style: TextStyle(color: Colors.white),)) ,*/
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -226,7 +213,9 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [SizedBox(width: 20,height: 50,),
+                            children: [SizedBox(height: 50,),
+                              Icon(Icons.sports_cricket),
+                              SizedBox(width: 10,),
                               Text("CRICKET",style: TextStyle(color: Colors.black,fontSize: 18),)
                             ],
                           ),
@@ -260,7 +249,9 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [SizedBox(width: 20,height: 50,),
+                            children: [SizedBox(height: 50,),
+                              Icon(Icons.sports_basketball_sharp),
+                              SizedBox(width: 10,),
                               Text("BASKETBALL",style: TextStyle(color: Colors.black,fontSize: 18),)
                             ],
                           ),
@@ -294,7 +285,9 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [SizedBox(width: 20,height: 50,),
+                            children: [SizedBox(height: 50,),
+                              Icon(Icons.sports_martial_arts),
+                              SizedBox(width: 10,),
                               Text("KHO-KHO",style: TextStyle(color: Colors.black,fontSize: 18),)
                             ],
                           ),
@@ -328,7 +321,9 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [SizedBox(width: 20,height: 50,),
+                            children: [SizedBox(height: 50,),
+                              Icon(Icons.sports_volleyball_sharp),
+                              SizedBox(width: 10,),
                               Text("VOLLYBALL",style: TextStyle(color: Colors.black,fontSize: 18),)
                             ],
                           ),
@@ -362,7 +357,9 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
                       child: Column(
                         children: [
                           Row(
-                            children: [SizedBox(width: 20,height: 50,),
+                            children: [SizedBox(height: 50,),
+                              Icon(Icons.sports_kabaddi),
+                              SizedBox(width: 10,),
                               Text("KABBADI",style: TextStyle(color: Colors.black,fontSize: 18),)
 
                             ],),
@@ -406,7 +403,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
             },
             ),
 
-            label: 'Tables',
+            label: 'Notice',
           ),
          /* BottomNavigationBarItem(
             icon: InkWell(child: Icon(Icons.view_comfortable),
@@ -421,7 +418,7 @@ class _LiveBuzzHomePageState extends State<LiveBuzzHomePage> {
         ],
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black,
-      ),git
+      ),
 
 
     );

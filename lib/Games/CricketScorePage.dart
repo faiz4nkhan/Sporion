@@ -259,10 +259,12 @@ class _CricketPageState extends State<Cricketscorepage> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.sports_cricket, color: Colors.black),
+            onPressed: () {},
+          ),
           title: Text('Cricket '),
           backgroundColor: Colors.white,
-          centerTitle: true,
-
           bottom: TabBar(
             onTap: (int index) {
               setState(() {

@@ -251,10 +251,12 @@ class _VolleyballScorePageState extends State<VolleyballScorePage> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.sports_volleyball_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
           title: Text('Volleyball '),
           backgroundColor: Colors.white,
-          centerTitle: true,
-
           bottom: TabBar(
             onTap: (int index) {
               setState(() {
